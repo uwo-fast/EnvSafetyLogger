@@ -74,7 +74,7 @@
     "ssh_key": ""
   },
   "meta": {
-    "filename": "environmental_safety_logger.kicad_prl",
+    "filename": "hardware.kicad_prl",
     "version": 3
   },
   "project": {
