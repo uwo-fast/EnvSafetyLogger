@@ -12,6 +12,11 @@ const int bluePin = 6;     // Digital Pin D6 for Blue LED
 const int buzzerPin = 7;   // Digital Pin D7 for Piezo Buzzer
 const int buttonPin = A6;  // Analog Pin A6 for Push Button
 
+const int mq8Pin = A0;     // Analog Pin A0 for MQ-8 Sensor (H2)
+const int mq136Pin = A1;   // Analog Pin A1 for MQ-136 Sensor (H2S)
+const int mq137Pin = A2;   // Analog Pin A2 for MQ-137 Sensor (NH3)
+const int mq9bPin = A3;   // Analog Pin A3 for MQ-9b Sensor (CO & CH4)
+
 // RTC Chip Select Pin
 const uint8_t DS3234_CS_PIN = 10; // DS3234 Chip-select pin
 
