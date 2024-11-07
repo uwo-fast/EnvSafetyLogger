@@ -1,3 +1,3 @@
 # Docs
 
-WIP
+The [`assets`](assets/) folder contains images related to design and build; [`datasheets`](datasheets/) contains datasheets for hardware components used in the build.
