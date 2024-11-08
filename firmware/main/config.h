@@ -55,7 +55,7 @@ const int GREEN[3]   = {0, 255, 0};
 // ------------------------------
 // Alarm Thresholds
 // ------------------------------
-#define CO2_THRESHOLD_PPM      1000  // CO2 threshold in ppm
+#define CO2_THRESHOLD_PPM      2000  // CO2 threshold in ppm
 #define TEMP_THRESHOLD_C       35.0  // Temperature threshold in Celsius
 #define HUMIDITY_THRESHOLD_RH  70.0  // Humidity threshold in %RH
 #define H2_THRESHOLD_PPM       100   // H₂ threshold in ppm
