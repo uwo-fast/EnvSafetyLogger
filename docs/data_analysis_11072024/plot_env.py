@@ -42,8 +42,8 @@ lines, labels = [], []
     color=colors["CO2"],
     linewidth=line_width,
 )
-ax1.set_ylabel("CO2_ppm", color=colors["CO2"])
-ax1.tick_params(axis="y", labelcolor=colors["CO2"])
+ax1.set_ylabel("CO2_ppm", color=colors["CO2"], fontsize=16)
+ax1.tick_params(axis="y", labelcolor=colors["CO2"], labelsize=16)
 ax1.set_ylim(co2_ylim)
 lines.append(line1)
 labels.append("CO2_ppm")
@@ -57,8 +57,8 @@ ax2 = ax1.twinx()
     color=colors["Temperature"],
     linewidth=line_width,
 )
-ax2.set_ylabel("Temperature_C", color=colors["Temperature"])
-ax2.tick_params(axis="y", labelcolor=colors["Temperature"])
+ax2.set_ylabel("Temperature_C", color=colors["Temperature"], fontsize=16)
+ax2.tick_params(axis="y", labelcolor=colors["Temperature"], labelsize=16)
 ax2.set_ylim(temp_ylim)
 lines.append(line2)
 labels.append("Temperature_C")
@@ -73,8 +73,8 @@ ax3.spines["right"].set_position(("outward", 60))
     color=colors["Humidity"],
     linewidth=line_width,
 )
-ax3.set_ylabel("Humidity_%RH", color=colors["Humidity"])
-ax3.tick_params(axis="y", labelcolor=colors["Humidity"])
+ax3.set_ylabel("Humidity_%RH", color=colors["Humidity"], fontsize=16)
+ax3.tick_params(axis="y", labelcolor=colors["Humidity"], labelsize=16)
 ax3.set_ylim(humidity_ylim)
 lines.append(line3)
 labels.append("Humidity_%RH")
@@ -89,8 +89,8 @@ ax4.spines["right"].set_position(("outward", 120))
     color=colors["TVOC"],
     linewidth=line_width,
 )
-ax4.set_ylabel("TVOC_ppb", color=colors["TVOC"])
-ax4.tick_params(axis="y", labelcolor=colors["TVOC"])
+ax4.set_ylabel("TVOC_ppb", color=colors["TVOC"], fontsize=16)
+ax4.tick_params(axis="y", labelcolor=colors["TVOC"], labelsize=16)
 ax4.set_ylim(tvoc_ylim)
 lines.append(line4)
 labels.append("TVOC_ppb")
@@ -98,9 +98,9 @@ labels.append("TVOC_ppb")
 # Annotate average AQI information in the top right corner
 ax1.annotate(
     f"Average AQI: {avg_aqi:.2f} / Max AQI: {max_aqi}",
-    xy=(0.9, 0.9),
+    xy=(0.97, 0.97),
     xycoords="axes fraction",
-    fontsize=10,
+    fontsize=16,
     color="orange",
     ha="right",
     va="top",
@@ -109,12 +109,20 @@ ax1.annotate(
 
 # Place consolidated legend in the top-left corner of the plot, stacked vertically
 fig.legend(
-    lines, labels, loc="upper left", frameon=False, bbox_to_anchor=(0.1, 0.9), ncol=1
+    lines,
+    labels,
+    loc="upper left",
+    frameon=False,
+    bbox_to_anchor=(0.07, 0.98),
+    ncol=1,
+    fontsize=16,
 )
 
 # Formatting for title, x-axis, and tick labels
 if show_title:
-    ax1.set_title("Environmental Data - CO2, Temperature, Humidity, and TVOC")
+    ax1.set_title(
+        "Environmental Data - CO2, Temperature, Humidity, and TVOC", fontsize=16
+    )
 output_file_suffix = "" if show_title else "_notitle"
 output_file = os.path.join(
     os.path.dirname(__file__), f"environment_data{output_file_suffix}.png"
@@ -124,7 +132,8 @@ ax1.xaxis.set_major_locator(
     mdates.HourLocator(interval=1)
 )  # Hourly intervals for x-axis
 ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-plt.xticks(rotation=45, ha="right")  # Rotate x-axis labels for readability
+ax1.tick_params(axis="x", labelsize=16)
+plt.xticks(rotation=45, ha="right", fontsize=16)  # Set x-axis tick label size to 16
 fig.tight_layout()  # Adjust layout for clarity
 
 # Save the plot as a PNG file
