@@ -10,17 +10,20 @@
 
 #include <Arduino.h>
 #include "config.h"
+#include "mqGas.h"
+#include "alarmThresholds.h"
 
 #include <SPI.h>
 #include <SD.h>
 #include <Wire.h>
 #include <RtcDS3234.h>
-#include <SparkFun_SCD4x_Arduino_Library.h>  // SCD41 Library
+#include <SparkFun_SCD4x_Arduino_Library.h> // SCD41 Library
 #include <LiquidCrystal_I2C.h>
 #include <LiquidMenu.h>
-#include "ScioSense_ENS160.h"  // ENS160 library
-#include <MQUnifiedsensor.h>   // MQ sensor library
-#include <EEPROM.h>            // EEPROM library
+#include "ScioSense_ENS160.h" // ENS160 library
+#include <MQUnifiedsensor.h>  // MQ sensor library
+#include <EEPROM.h>           // EEPROM library
+#include <math.h>             // For NAN and isnan()
 
 // Initialize LCD
 LiquidCrystal_I2C lcd(LCD_I2C_ADDRESS, LCD_COLUMNS, LCD_ROWS);
@@ -37,42 +40,19 @@ SCD4x scd41;
 // Initialize ENS160 Sensor
 ScioSense_ENS160 ens160(ENS160_I2CADDR_1);
 
-// Definitions for MQ Sensors
-#define DEVICE "Arduino Nano"
-#define VOLTAGE_RESOLUTION 5
-#define ADC_BIT_RESOLUTION 10
-
-// Definitions for MQ-8 Sensor
-#define MQ8_TYPE "MQ-8"
-#define MQ8_RATIO_CLEAN_AIR 70 // RS / R0 = 70 ppm
-#define EEPROM_ADDRESS_MQ8_R0 0 // EEPROM address for MQ-8 R0
-
-// Declare MQ-8 Sensor Object
+// Initialize the MQ Sensors
 MQUnifiedsensor MQ8(DEVICE, VOLTAGE_RESOLUTION, ADC_BIT_RESOLUTION, mq8Pin, MQ8_TYPE);
-
-// Definitions for MQ-136 Sensor
-#define MQ136_TYPE "MQ-136"
-#define MQ136_RATIO_CLEAN_AIR 3.6 // RS / R0 = 3.6 ppm
-#define EEPROM_ADDRESS_MQ136_R0 4 // EEPROM address for MQ-136 R0
-
-// Declare MQ-136 Sensor Object
 MQUnifiedsensor MQ136(DEVICE, VOLTAGE_RESOLUTION, ADC_BIT_RESOLUTION, mq136Pin, MQ136_TYPE);
-
-// Definitions for MQ-137 Sensor
-#define MQ137_TYPE "MQ-137"
-#define MQ137_RATIO_CLEAN_AIR 4.2 // RS / R0 = 4.2 ppm
-#define EEPROM_ADDRESS_MQ137_R0 8 // EEPROM address for MQ-137 R0
-
-// Declare MQ-137 Sensor Object
 MQUnifiedsensor MQ137(DEVICE, VOLTAGE_RESOLUTION, ADC_BIT_RESOLUTION, mq137Pin, MQ137_TYPE);
-
-// Definitions for MQ-9b Sensor
-#define MQ9B_TYPE "MQ-9"
-#define MQ9B_RATIO_CLEAN_AIR 9.6 // RS / R0 = 9.6 ppm
-#define EEPROM_ADDRESS_MQ9B_R0 12 // EEPROM address for MQ-9b R0
-
-// Declare MQ-9b Sensor Object
 MQUnifiedsensor MQ9B(DEVICE, VOLTAGE_RESOLUTION, ADC_BIT_RESOLUTION, mq9bPin, MQ9B_TYPE);
+
+// Enum for Alarm Levels
+enum AlarmLevel
+{
+    NO_ALARM,
+    WARNING,
+    DANGER
+};
 
 // Global Variables
 File dataFile;
@@ -93,7 +73,7 @@ float h2_ppm = 0.0;
 float h2s_ppm = 0.0;
 float nh3_ppm = 0.0;
 float ch4_ppm = 0.0; // Methane concentration
-float co_ppm = 0.0;   // Carbon Monoxide concentration
+float co_ppm = 0.0;  // Carbon Monoxide concentration
 
 // Button Debounce Variables
 bool buttonState = HIGH;
@@ -101,15 +81,16 @@ bool lastButtonState = HIGH;
 unsigned long lastDebounceTime = 0;
 
 // Alarm Variables
-bool alarmTriggered = false;
-bool alarmActive = false;
-unsigned long alarmStartTime = 0;
-const unsigned long ALARM_DURATION_MS = 500;
+AlarmLevel alarmLevel = NO_ALARM;
+unsigned long lastBuzzerToggleTime = 0;
+bool buzzerState = false;
+const unsigned long BUZZER_TOGGLE_INTERVAL_MS = 1000; // 1 second
 
 // MQ-9b Relay Control Variables
 unsigned long mq9bPreviousMillis = 0;
-unsigned long mq9bInterval = 60000;  // 60 seconds for HIGH (5V) phase
-bool mq9bHighState = true;           // Start in the HIGH (5V) phase
+unsigned long mq9bInterval = 60000; // 60 seconds for HIGH (5V) phase
+bool mq9bHighState = true;          // Start in the HIGH (5V) phase
+unsigned long mq9bSwitchTime = 0;   // Time when MQ-9b relay was switched
 
 // Timing Variable for Sensor Sampling
 unsigned long lastMillis = 0; // Declared globally
@@ -123,6 +104,7 @@ void checkAndTriggerAlarms();
 void updateLCDMenu();
 void handleButtonPress();
 void controlMQ9bRelay();
+void readSensors();
 
 // Create LiquidLine and LiquidScreen objects
 
@@ -189,7 +171,8 @@ LiquidScreen screen11(screen11_line1, screen11_line2);
 void setup()
 {
     Serial.begin(SERIAL_BAUD_RATE);
-    while (!Serial && ENABLE_DATA_PRINTS); // Wait for serial if data printing is enabled
+    while (!Serial && ENABLE_DATA_PRINTS)
+        ; // Wait for serial if data printing is enabled
 
     initializePins();
 
@@ -292,8 +275,8 @@ void setup()
 
     // Initialize MQ-8 Sensor
     MQ8.setRegressionMethod(1); // _PPM =  a*ratio^b
-    MQ8.setA(976.97);
-    MQ8.setB(-0.688); // Configure the equation to calculate H2 concentration
+    MQ8.setA(A_VALUE_MQ8);
+    MQ8.setB(B_VALUE_MQ8); // Configure the equation to calculate H2 concentration
 
     MQ8.init();
 
@@ -343,8 +326,8 @@ void setup()
 
     // Initialize MQ-136 Sensor
     MQ136.setRegressionMethod(1); // _PPM =  a*ratio^b
-    MQ136.setA(36.737);
-    MQ136.setB(-3.536); // Configure the equation to calculate H2S concentration
+    MQ136.setA(A_VALUE_MQ136);
+    MQ136.setB(B_VALUE_MQ136); // Configure the equation to calculate H2S concentration
 
     MQ136.init();
 
@@ -394,8 +377,8 @@ void setup()
 
     // Initialize MQ-137 Sensor
     MQ137.setRegressionMethod(1); // _PPM =  a*ratio^b
-    MQ137.setA(116.602);
-    MQ137.setB(-2.769); // Configure the equation to calculate NH3 concentration
+    MQ137.setA(A_VALUE_MQ137);
+    MQ137.setB(B_VALUE_MQ137); // Configure the equation to calculate NH3 concentration
 
     MQ137.init();
 
@@ -445,8 +428,8 @@ void setup()
 
     // Initialize MQ-9b Sensor
     MQ9B.setRegressionMethod(1); // _PPM =  a*ratio^b
-    MQ9B.setA(4269.6); // Methane (CH4) model
-    MQ9B.setB(-2.648); // Methane (CH4) model
+    MQ9B.setA(A_VALUE_MQ9B_CH4); // Methane (CH4) model
+    MQ9B.setB(B_VALUE_MQ9B_CH4); // Methane (CH4) model
 
     MQ9B.init();
 
@@ -507,12 +490,13 @@ void setup()
     initializeAlarms();
 
     // Set LED to green initially
-    analogWrite(redPin, GREEN[0]);
-    analogWrite(greenPin, GREEN[1]);
-    analogWrite(bluePin, GREEN[2]);
+    analogWrite(redPin, 0);
+    analogWrite(greenPin, 255);
+    analogWrite(bluePin, 0);
 
     // Initialize Relay for MQ-9b (Start in HIGH state - 5V)
     digitalWrite(relayPin, HIGH); // HIGH corresponds to 5V phase
+    mq9bSwitchTime = millis();    // Initialize the switch time
 
 #if ENABLE_DEBUG_PRINTS
     Serial.println(F("System initialized."));
@@ -547,30 +531,41 @@ void loop()
         logSensorData();
     }
 
-    // Handle non-blocking alarm buzzer
-    if (alarmActive)
+    // Handle alarm buzzer and LED colors based on alarmLevel
+    if (alarmLevel == DANGER)
     {
-        if (currentMillis - alarmStartTime >= ALARM_DURATION_MS)
-        {
-            digitalWrite(buzzerPin, LOW);
-            alarmActive = false;
-        }
-    }
+        // Buzzer on continuously
+        digitalWrite(buzzerPin, HIGH);
 
-    // Set LED color depending on alarmTriggered
-    if (alarmTriggered)
-    {
         // Set LED to red
-        analogWrite(redPin, RED[0]);
-        analogWrite(greenPin, RED[1]);
-        analogWrite(bluePin, RED[2]);
+        analogWrite(redPin, 255);
+        analogWrite(greenPin, 0);
+        analogWrite(bluePin, 0);
     }
-    else
+    else if (alarmLevel == WARNING)
     {
+        // Buzzer toggles on and off periodically
+        if (currentMillis - lastBuzzerToggleTime >= BUZZER_TOGGLE_INTERVAL_MS)
+        {
+            buzzerState = !buzzerState;
+            digitalWrite(buzzerPin, buzzerState ? HIGH : LOW);
+            lastBuzzerToggleTime = currentMillis;
+        }
+
+        // Set LED to orange (mix of red and green)
+        analogWrite(redPin, 255);
+        analogWrite(greenPin, 165); // Approximate value for orange
+        analogWrite(bluePin, 0);
+    }
+    else // NO_ALARM
+    {
+        // Buzzer off
+        digitalWrite(buzzerPin, LOW);
+
         // Set LED to green
-        analogWrite(redPin, GREEN[0]);
-        analogWrite(greenPin, GREEN[1]);
-        analogWrite(bluePin, GREEN[2]);
+        analogWrite(redPin, 0);
+        analogWrite(greenPin, 255);
+        analogWrite(bluePin, 0);
     }
 }
 
@@ -606,16 +601,16 @@ void initializeAlarms()
 void initializeLCDMenu()
 {
     // Set decimal places for floats and integers as needed
-    screen0_line2.set_decimalPlaces(0); // Timestamp is a string, no decimals
-    screen1_line2.set_decimalPlaces(0); // CO2 ppm
-    screen2_line2.set_decimalPlaces(1); // Temperature C
-    screen3_line2.set_decimalPlaces(1); // Humidity %RH
-    screen4_line2.set_decimalPlaces(0); // AQI
-    screen5_line2.set_decimalPlaces(0); // TVOC ppb
-    screen6_line2.set_decimalPlaces(0); // eCO2 ppm
-    screen7_line2.set_decimalPlaces(2); // H2 ppm
-    screen8_line2.set_decimalPlaces(2); // H2S ppm
-    screen9_line2.set_decimalPlaces(2); // NH3 ppm
+    screen0_line2.set_decimalPlaces(0);  // Timestamp is a string, no decimals
+    screen1_line2.set_decimalPlaces(0);  // CO2 ppm
+    screen2_line2.set_decimalPlaces(1);  // Temperature C
+    screen3_line2.set_decimalPlaces(1);  // Humidity %RH
+    screen4_line2.set_decimalPlaces(0);  // AQI
+    screen5_line2.set_decimalPlaces(0);  // TVOC ppb
+    screen6_line2.set_decimalPlaces(0);  // eCO2 ppm
+    screen7_line2.set_decimalPlaces(2);  // H2 ppm
+    screen8_line2.set_decimalPlaces(2);  // H2S ppm
+    screen9_line2.set_decimalPlaces(2);  // NH3 ppm
     screen10_line2.set_decimalPlaces(2); // CH4 ppm
     screen11_line2.set_decimalPlaces(2); // CO ppm
 
@@ -697,21 +692,41 @@ void readSensors()
     // Read MQ-9b Sensor
     MQ9B.update(); // Read the voltage from the analog pin
 
+    unsigned long currentMillis = millis();
+
     if (mq9bHighState)
     {
         // HIGH (5V) phase: measure CH4
-        MQ9B.setA(4269.6);
-        MQ9B.setB(-2.648);
-        ch4_ppm = MQ9B.readSensor();
-        co_ppm = 0.0; // Reset CO ppm during CH4 measurement
+        MQ9B.setA(A_VALUE_MQ9B_CH4);
+        MQ9B.setB(B_VALUE_MQ9B_CH4);
+
+        // Check if settling time has passed
+        if (currentMillis - mq9bSwitchTime >= SETTLE_TIME_TO_CH4)
+        {
+            ch4_ppm = MQ9B.readSensor();
+        }
+        else
+        {
+            ch4_ppm = NAN;
+        }
+        co_ppm = NAN; // CO measurement is not valid in this phase
     }
     else
     {
         // LOW (1.5V) phase: measure CO
-        MQ9B.setA(599.65);
-        MQ9B.setB(-2.244);
-        co_ppm = MQ9B.readSensor();
-        ch4_ppm = 0.0; // Reset CH4 ppm during CO measurement
+        MQ9B.setA(A_VALUE_MQ9B_CO);
+        MQ9B.setB(B_VALUE_MQ9B_CO);
+
+        // Check if settling time has passed
+        if (currentMillis - mq9bSwitchTime >= SETTLE_TIME_TO_CO)
+        {
+            co_ppm = MQ9B.readSensor();
+        }
+        else
+        {
+            co_ppm = NAN;
+        }
+        ch4_ppm = NAN; // CH4 measurement is not valid in this phase
     }
 }
 
@@ -742,75 +757,108 @@ void handleButtonPress()
 
 void checkAndTriggerAlarms()
 {
-    alarmTriggered = false; // Reset alarmTriggered at the start
+    // Reset alarmLevel at the start
+    alarmLevel = NO_ALARM;
 
-    if (co2 > CO2_THRESHOLD_PPM)
+    // Check each parameter and set alarmLevel accordingly
+
+    // Temperature
+    if (temperature >= TEMP_DANGER_THRESHOLD_C)
     {
-        alarmTriggered = true;
-        if (ENABLE_DEBUG_PRINTS)
-            Serial.println(F("ALARM: High CO2 detected!"));
+        alarmLevel = DANGER;
+    }
+    else if (temperature >= TEMP_WARNING_THRESHOLD_C && alarmLevel != DANGER)
+    {
+        alarmLevel = WARNING;
     }
 
-    if (temperature > TEMP_THRESHOLD_C)
+    // Humidity
+    if (humidity >= HUMIDITY_DANGER_THRESHOLD_RH)
     {
-        alarmTriggered = true;
-        if (ENABLE_DEBUG_PRINTS)
-            Serial.println(F("ALARM: High Temperature detected!"));
+        alarmLevel = DANGER;
+    }
+    else if (humidity >= HUMIDITY_WARNING_THRESHOLD_RH && alarmLevel != DANGER)
+    {
+        alarmLevel = WARNING;
     }
 
-    if (humidity > HUMIDITY_THRESHOLD_RH)
+    // CO2
+    if (co2 >= CO2_DANGER_THRESHOLD_PPM)
     {
-        alarmTriggered = true;
-        if (ENABLE_DEBUG_PRINTS)
-            Serial.println(F("ALARM: High Humidity detected!"));
+        alarmLevel = DANGER;
+    }
+    else if (co2 >= CO2_WARNING_THRESHOLD_PPM && alarmLevel != DANGER)
+    {
+        alarmLevel = WARNING;
     }
 
-    if (h2_ppm > H2_THRESHOLD_PPM)
+    // H2
+    if (h2_ppm >= H2_DANGER_THRESHOLD_PPM)
     {
-        alarmTriggered = true;
-        if (ENABLE_DEBUG_PRINTS)
-            Serial.println(F("ALARM: High H2 detected!"));
+        alarmLevel = DANGER;
+    }
+    else if (h2_ppm >= H2_WARNING_THRESHOLD_PPM && alarmLevel != DANGER)
+    {
+        alarmLevel = WARNING;
     }
 
-    if (h2s_ppm > H2S_THRESHOLD_PPM)
+    // H2S
+    if (h2s_ppm >= H2S_DANGER_THRESHOLD_PPM)
     {
-        alarmTriggered = true;
-        if (ENABLE_DEBUG_PRINTS)
-            Serial.println(F("ALARM: High H2S detected!"));
+        alarmLevel = DANGER;
+    }
+    else if (h2s_ppm >= H2S_WARNING_THRESHOLD_PPM && alarmLevel != DANGER)
+    {
+        alarmLevel = WARNING;
     }
 
-    if (nh3_ppm > NH3_THRESHOLD_PPM)
+    // NH3
+    if (nh3_ppm >= NH3_DANGER_THRESHOLD_PPM)
     {
-        alarmTriggered = true;
-        if (ENABLE_DEBUG_PRINTS)
-            Serial.println(F("ALARM: High NH3 detected!"));
+        alarmLevel = DANGER;
+    }
+    else if (nh3_ppm >= NH3_WARNING_THRESHOLD_PPM && alarmLevel != DANGER)
+    {
+        alarmLevel = WARNING;
     }
 
-    if (ch4_ppm > CH4_THRESHOLD_PPM)
+    // CH4
+    if (!isnan(ch4_ppm))
     {
-        alarmTriggered = true;
-        if (ENABLE_DEBUG_PRINTS)
-            Serial.println(F("ALARM: High CH4 detected!"));
-    }
-
-    if (co_ppm > CO_THRESHOLD_PPM)
-    {
-        alarmTriggered = true;
-        if (ENABLE_DEBUG_PRINTS)
-            Serial.println(F("ALARM: High CO detected!"));
-    }
-
-    if (alarmTriggered)
-    {
-        if (!alarmActive) // Start the buzzer if not already active
+        if (ch4_ppm >= CH4_DANGER_THRESHOLD_PPM)
         {
-            alarmActive = true;
-            alarmStartTime = millis();
-            digitalWrite(buzzerPin, HIGH);
-            if (ENABLE_DEBUG_PRINTS)
-                Serial.println(F("Alarm activated!"));
+            alarmLevel = DANGER;
+        }
+        else if (ch4_ppm >= CH4_WARNING_THRESHOLD_PPM && alarmLevel != DANGER)
+        {
+            alarmLevel = WARNING;
         }
     }
+
+    // CO
+    if (!isnan(co_ppm))
+    {
+        if (co_ppm >= CO_DANGER_THRESHOLD_PPM)
+        {
+            alarmLevel = DANGER;
+        }
+        else if (co_ppm >= CO_WARNING_THRESHOLD_PPM && alarmLevel != DANGER)
+        {
+            alarmLevel = WARNING;
+        }
+    }
+
+    // Debug prints
+#if ENABLE_DEBUG_PRINTS
+    if (alarmLevel == DANGER)
+    {
+        Serial.println(F("ALARM: DANGER level detected!"));
+    }
+    else if (alarmLevel == WARNING)
+    {
+        Serial.println(F("ALARM: WARNING level detected!"));
+    }
+#endif
 }
 
 void logSensorData()
@@ -842,9 +890,21 @@ void logSensorData()
             dataFile.print(",");
             dataFile.print(nh3_ppm, 2);
             dataFile.print(",");
-            dataFile.print(ch4_ppm, 2);
+
+            // CH4 ppm
+            if (isnan(ch4_ppm))
+                dataFile.print("NaN");
+            else
+                dataFile.print(ch4_ppm, 2);
+
             dataFile.print(",");
-            dataFile.print(co_ppm, 2);
+
+            // CO ppm
+            if (isnan(co_ppm))
+                dataFile.print("NaN");
+            else
+                dataFile.print(co_ppm, 2);
+
             dataFile.println();
             dataFile.close();
         }
@@ -880,9 +940,19 @@ void logSensorData()
         Serial.print(F(", \"NH3\":"));
         Serial.print(nh3_ppm, 2);
         Serial.print(F(", \"CH4\":"));
-        Serial.print(ch4_ppm, 2);
+
+        if (isnan(ch4_ppm))
+            Serial.print("NaN");
+        else
+            Serial.print(ch4_ppm, 2);
+
         Serial.print(F(", \"CO\":"));
-        Serial.print(co_ppm, 2);
+
+        if (isnan(co_ppm))
+            Serial.print("NaN");
+        else
+            Serial.print(co_ppm, 2);
+
         Serial.println(F("}"));
     }
 }
@@ -900,8 +970,12 @@ void controlMQ9bRelay()
         // Toggle relay state
         mq9bHighState = !mq9bHighState;
         digitalWrite(relayPin, mq9bHighState ? HIGH : LOW);
+
+        // Update mq9bSwitchTime
+        mq9bSwitchTime = currentMillis;
+
 #if ENABLE_DEBUG_PRINTS
-        Serial.print("Relay Switched: ");
+        Serial.print(F("Relay Switched: "));
         Serial.println(mq9bHighState ? "HIGH (CH4 detection)" : "LOW (CO detection)");
 #endif
 
