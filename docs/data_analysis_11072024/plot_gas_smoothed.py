@@ -69,6 +69,7 @@ ax1.plot(
     **kwargs,
     marker=[(1 - d, -d), (1, 0)],
     markersize=8,
+    
     linestyle="None",
 )
 ax2.plot(

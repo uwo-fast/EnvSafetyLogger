@@ -17,7 +17,7 @@
 // ------------------------------
 // Logging Settings
 // ------------------------------
-#define LOG_FILE_NAME "dataLog.csv" // Name of the log file on SD card (changed to .csv)
+#define LOG_FILE_NAME "dataLog3.csv" // Name of the log file on SD card (changed to .csv)
 #define LOG_TO_SD true              // Enable/Disable logging to SD card
 
 // ------------------------------
@@ -51,18 +51,6 @@ const int GREEN[3]   = {0, 255, 0};
 // Sampling Settings
 // ------------------------------
 #define SAMPLING_INTERVAL_MS 5000 // Interval between sensor readings in milliseconds (5 seconds)
-
-// ------------------------------
-// Alarm Thresholds
-// ------------------------------
-#define CO2_THRESHOLD_PPM      2000  // CO2 threshold in ppm
-#define TEMP_THRESHOLD_C       35.0  // Temperature threshold in Celsius
-#define HUMIDITY_THRESHOLD_RH  70.0  // Humidity threshold in %RH
-#define H2_THRESHOLD_PPM       100   // H₂ threshold in ppm
-#define H2S_THRESHOLD_PPM      10    // H₂S threshold in ppm
-#define NH3_THRESHOLD_PPM      25    // NH₃ threshold in ppm
-#define CH4_THRESHOLD_PPM      100   // CH₄ threshold in ppm
-#define CO_THRESHOLD_PPM       50    // CO threshold in ppm
 
 // ------------------------------
 // I2C LCD Settings
