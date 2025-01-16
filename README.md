@@ -9,6 +9,7 @@ This project involves designing an environmental safety monitor to measure and l
 Future work includes:
 
 - Weather-resistant enclosure (standard ingress protection)
+- Wireless connectivity to enable data transmission and remote monitoring
 - Improved calibration and integration of MQ sensors
   - See [CameronBrooks11/MQ-xx](https://github.com/CameronBrooks11/MQ-xx) for initial work involving extraction of regression parameters from component datasheets
 - PCB design
