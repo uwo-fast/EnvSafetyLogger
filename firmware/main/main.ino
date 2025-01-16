@@ -8,22 +8,32 @@
 
 ***************************************************************************/
 
+// Include Core Arduino Library
 #include <Arduino.h>
+
+// Program Specific Configurations
 #include "config.h"
 #include "mqGas.h"
 #include "alarmThresholds.h"
 
-#include <SPI.h>
-#include <SD.h>
-#include <Wire.h>
-#include <RtcDS3234.h>
-#include <SparkFun_SCD4x_Arduino_Library.h> // SCD41 Library
-#include <LiquidCrystal_I2C.h>
-#include <LiquidMenu.h>
-#include "ScioSense_ENS160.h" // ENS160 library
-#include <MQUnifiedsensor.h>  // MQ sensor library
-#include <EEPROM.h>           // EEPROM library
-#include <math.h>             // For NAN and isnan()
+// Standard Arduino Libraries
+#include <SPI.h>    // SPI library
+#include <Wire.h>   // I2C library
+#include <EEPROM.h> // EEPROM library
+#include <math.h>   // For NAN and isnan()
+
+// Logging Libraries
+#include <SD.h>        // SD card library
+#include <RtcDS3234.h> // RTC library
+
+// Sensor Libraries
+#include "SparkFun_SCD4x_Arduino_Library.h" // SCD41 Library
+#include <ScioSense_ENS160.h>               // ENS160 library
+#include <MQUnifiedsensor.h>                // MQ sensor library
+
+// LCD Libraries
+#include <LiquidCrystal_I2C.h> // Base I2C LCD library
+#include <LiquidMenu.h>       // LCD Menu library
 
 // Initialize LCD
 LiquidCrystal_I2C lcd(LCD_I2C_ADDRESS, LCD_COLUMNS, LCD_ROWS);
