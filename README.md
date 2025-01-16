@@ -13,6 +13,8 @@ Future work includes:
   - See [CameronBrooks11/MQ-xx](https://github.com/CameronBrooks11/MQ-xx) for initial work involving extraction of regression parameters from component datasheets
 - PCB design
 - Variation for measuring closed systems with directed sampling
+- Use Wet Bulb Globe Temperature (WBGT) as measure of heat stress conditions
+  - WBGT is a measure of how hot it feels in direct sunlight, taking into account temperature, humidity, wind, and sun
 
 ## Results
 
