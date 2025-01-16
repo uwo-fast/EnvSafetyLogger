@@ -14,7 +14,6 @@ The [`assets`](assets/) folder contains images related to design and build; [`da
   - [Software Dependancies](#software-dependancies)
   - [Usage Instructions](#usage-instructions)
   - [Troubleshooting](#troubleshooting)
-  - [Conclusion](#conclusion)
 
 ## Introduction
 
@@ -127,9 +126,3 @@ Consult the following table for the various library dependancies.
     - Ensure the I2C LCD library is also installed and included in the project
   - Verify I2C connections.
   - Check the LCD address and dimensions in `config.h`.
-
-## Conclusion
-
-EnvSafetyMonitor provides a comprehensive solution for real-time environmental monitoring, combining accurate sensor data collection, intuitive user interfaces, reliable data logging, and prompt alarm notifications. Proper setup and calibration are essential for optimal performance, ensuring the system effectively safeguards against hazardous environmental conditions.
-
-For further enhancements, consider integrating wireless data transmission for remote monitoring or expanding the system with additional sensors to cover a broader range of environmental parameters.
