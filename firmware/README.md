@@ -1,286 +1,192 @@
-# Firmware
+# Firmware Docs
 
-_EnvSafetyMonitor - Environmental Safety Monitoring System_
-
-## Table of Contents
-
-- [Firmware](#firmware)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [System Overview](#system-overview)
-  - [Hardware Components](#hardware-components)
-  - [Software Dependancies](#software-dependancies)
-  - [Software Structure](#software-structure)
-    - [Configuration (`config.h`)](#configuration-configh)
-      - [Debugging Settings](#debugging-settings)
-      - [Calibration Settings](#calibration-settings)
-      - [Logging Settings](#logging-settings)
-      - [Pin Definitions](#pin-definitions)
-      - [Standard Colors Definitions](#standard-colors-definitions)
-      - [Sampling Settings](#sampling-settings)
-      - [Alarm Thresholds](#alarm-thresholds)
-      - [I2C LCD Settings](#i2c-lcd-settings)
-      - [Serial Communication Settings](#serial-communication-settings)
-      - [Debounce Settings](#debounce-settings)
-  - [Sensor Initialization and Calibration](#sensor-initialization-and-calibration)
-  - [Data Logging](#data-logging)
-  - [Alarm System](#alarm-system)
-  - [LCD Menu Interface](#lcd-menu-interface)
-  - [Pin Configuration](#pin-configuration)
-  - [Usage Instructions](#usage-instructions)
-  - [Troubleshooting](#troubleshooting)
-  - [Conclusion](#conclusion)
-
-## Introduction
-
-EnvSafetyMonitor is an Environmental Safety Monitoring System designed to continuously monitor various environmental parameters to ensure safety and compliance. The system leverages multiple sensors to detect levels of gases, temperature, and humidity, providing real-time data visualization, logging, and alarm notifications.
-
-## System Overview
-
-The system integrates several components:
-
-- **Sensors:** SCD41 (CO₂, temperature, humidity), ENS160 (AQI, TVOC, eCO₂), MQ series (H₂, H₂S, NH₃, CH₄, CO).
-- **Display:** 2x16 I2C LCD for real-time data visualization.
-- **Data Logging:** SD card module for recording sensor data in CSV format.
-- **Alarms:** Buzzer and RGB LED indicators for alerting based on predefined thresholds.
-- **User Interface:** Push button to navigate through different data screens on the LCD.
-
-## Hardware Components
-
-- **Arduino Nano:** The microcontroller that orchestrates all operations.
-- **SCD41 Sensor:** Measures CO₂ concentration, temperature, and humidity.
-- **ENS160 Sensor:** Provides Air Quality Index (AQI), Total Volatile Organic Compounds (TVOC), and equivalent CO₂ (eCO₂) readings.
-- **MQ Series Sensors:**
-  - **MQ-8:** Detects Hydrogen (H₂) concentrations.
-  - **MQ-136:** Measures Hydrogen Sulfide (H₂S) levels.
-  - **MQ-137:** Monitors Ammonia (NH₃) concentrations.
-  - **MQ-9b:** Detects Methane (CH₄) and Carbon Monoxide (CO) levels.
-- **2x16 I2C LCD:** Displays sensor readings and system status.
-- **SD Card Module:** Logs sensor data for future analysis.
-- **RGB LEDs:** Visual indicators for system status (Green for normal, Red for alarms).
-- **Piezo Buzzer:** Auditory alarm for threshold breaches.
-- **Relay Module:** Controls the heating element for the MQ-9b sensor.
-- **Push Button:** Allows users to navigate through LCD screens.
-- **RTC Module (DS3234):** Keeps accurate time for timestamping logs.
-
-## Software Dependancies
-
-(alm=arduino lib manager)
-
-- [MQSensorsLib](https://github.com/miguel5612/MQSensorsLib)
-- https://github.com/Makuna/Rtc (search `rtc makuna` in alm)
-- 
-- 
-
-
+Welcome to the firmware docs! Here you will find...fuinish
 
 ## Software Structure
 
-The software is divided into four main files: `config.h` and `main.ino`.
+The software is divided into four main files:`main.ino`, `config.h`, `mqGas.h` and `alarmThresholds.h`.
 
-### Configuration (`config.h`)
+### `main.ino`
+
+The program monitors environmental safety parameters using various sensors and logs data to an SD card and serial output.
+
+#### Program Flow
+
+1. Initialize pins, sensors, and libraries
+2. Read sensor data every `SAMPLING_INTERVAL_MS`
+3. Update LCD menu display and check/triggers alarms
+4. Log data to SD card and serial output
+
+#### Key Components
+
+- **Sensor Initialization and Calibration**:
+  - SCD41: Begins periodic measurement upon successful initialization
+  - ENS160: Configured to operate in standard mode
+  - MQ Series: Calibrated using `PERFORM_MQ_CALIBRATION` flag, analog values mapped to ppm using exponential regression, R0 value stored in EEPROM
+- **Alarm System**:
+  - Threshold-based alarm triggering (DANGER/WARNING)
+  - Activates piezo buzzer and changes RGB LED color to red upon alarm
+- **Logging**:
+  - SD card (CSV): Records sensor data with timestamp
+  - Serial output (JSON): Real-time monitoring or integration with other systems
+- **LCD Menu Interface**:
+  - Utilizes LiquidMenu library for multiple screens displaying sensor readings
+  - Navigation via push button, with screens for system title, timestamp, and individual sensor readings
+
+### `config.h`
 
 This header file contains all configurable settings, pin definitions, thresholds, and other constants used throughout the EnvSafetyMonitor system.
 
-#### Debugging Settings
+- Debugging Settings
+  - `ENABLE_DEBUG_PRINTS`: Toggle for enabling/disabling debug messages.
+  - `ENABLE_DATA_PRINTS`: Toggle for enabling/disabling data output to Serial.
+- Calibration Settings
+  - `PERFORM_MQ_CALIBRATION`: Determines whether to calibrate MQ sensors on startup. Note that once this is enabled you should boot the system, allow calibration, then reupload with this setting disabled during production use.
+- Logging Settings
+  - `LOG_FILE_NAME`: Name of the CSV log file on the SD card.
+  - `LOG_TO_SD`: Enables/disables logging sensor data to the SD card.
+- Standard Colors Definitions
+  - `RED`: RGB values for red color.
+  - `GREEN`: RGB values for green color.
+- Sampling Settings
+  - `SAMPLING_INTERVAL_MS`: Time interval between consecutive sensor readings.
+- I2C LCD Settings
+  - `LCD_I2C_ADDRESS`: I2C address of the LCD.
+  - `LCD_COLUMNS`: Number of columns on the LCD.
+  - `LCD_ROWS`: Number of rows on the LCD.
+- Serial Communication Settings
+  - `SERIAL_BAUD_RATE`: Baud rate for Serial communication.
+- Debounce Settings
+  - `DEBOUNCE_DELAY_MS`: Delay for debouncing the push button.
 
-- `ENABLE_DEBUG_PRINTS`: Toggle for enabling/disabling debug messages.
-- `ENABLE_DATA_PRINTS`: Toggle for enabling/disabling data output to Serial.
+### `alarmThresholds.h`
 
-#### Calibration Settings
+The following thresholds are used to trigger warning and danger alarms for various environmental parameters.
 
-- `PERFORM_MQ_CALIBRATION`: Determines whether to calibrate MQ sensors on startup.
+#### Temperature & Humidity Thresholds
 
-#### Logging Settings
+- Temperature
+  - `TEMP_WARNING_THRESHOLD_C`: 30.0°C - Temperature warning threshold
+  - `TEMP_DANGER_THRESHOLD_C`: 35.0°C - Temperature danger threshold
+  - Temperatures around 30°C increase the risk of heat stress, while temperatures at or above 35°C pose a higher risk of heat-related illnesses.
+- Relative Humidity (RH)
+  - `HUMIDITY_WARNING_THRESHOLD_RH`: 60.0%RH - Humidity warning threshold
+  - `HUMIDITY_DANGER_THRESHOLD_RH`: 80.0%RH - Humidity danger threshold
+    High humidity levels reduce the body's ability to cool itself, with increased risk at 80% humidity.
 
-- `LOG_FILE_NAME`: Name of the CSV log file on the SD card.
-- `LOG_TO_SD`: Enables/disables logging sensor data to the SD card.
+#### Gas Concentration Thresholds
 
-#### Pin Definitions
+- Carbon Dioxide (CO2)
 
-- **LEDs:**
-  - `redPin`: Connected to Red LED.
-  - `greenPin`: Connected to Green LED.
-  - `bluePin`: Connected to Blue LED.
-- **Buzzer and Button:**
-  - `buzzerPin`: Connected to Piezo Buzzer.
-  - `buttonPin`: Connected to Push Button.
-- **Sensors:**
-  - `mq8Pin`: Connected to MQ-8 Sensor.
-  - `mq136Pin`: Connected to MQ-136 Sensor.
-  - `mq137Pin`: Connected to MQ-137 Sensor.
-  - `mq9bPin`: Connected to MQ-9b Sensor.
-- **Relay:**
-  - `relayPin`: Controls the Relay for MQ-9b Heater Voltage.
-- **Communication:**
-  - `DS3234_CS_PIN`: Chip-select pin for RTC module.
-  - `chipSelect`: Chip-select pin for SD card module.
+  - `CO2_WARNING_THRESHOLD_PPM`: 5000 ppm - CO₂ warning threshold
+  - `CO2_DANGER_THRESHOLD_PPM`: 15000 ppm - CO₂ danger threshold
+  - **Based on:** OSHA's PEL for CO₂ is 5,000 ppm over an 8-hour workday, with concentrations above 15,000 ppm causing respiratory issues.
 
-#### Standard Colors Definitions
+- Hydrogen (H2)
 
-- `RED`: RGB values for red color.
-- `GREEN`: RGB values for green color.
+  - `H2_WARNING_THRESHOLD_PPM`: 4000 ppm - H₂ warning threshold
+  - `H2_DANGER_THRESHOLD_PPM`: 8000 ppm - H₂ danger threshold
+  - **Based on:** Hydrogen is highly flammable, with warning and danger thresholds set at 10% and 20% of the Lower Explosive Limit (LEL).
 
-#### Sampling Settings
+- Hydrogen Sulfide (H2S)
 
-- `SAMPLING_INTERVAL_MS`: Time interval between consecutive sensor readings.
+  - `H2S_WARNING_THRESHOLD_PPM`: 10 ppm - H₂S warning threshold
+  - `H2S_DANGER_THRESHOLD_PPM`: 50 ppm - H₂S danger threshold
+  - **Based on:** OSHA's PEL for H₂S is 10 ppm over an 8-hour workday, with concentrations above 15 ppm causing eye irritation.
 
-#### Alarm Thresholds
+- Ammonia (NH3)
 
-Defines the maximum allowable values for various parameters before triggering alarms:
+  - `NH3_WARNING_THRESHOLD_PPM`: 25 ppm - NH₃ warning threshold
+  - `NH3_DANGER_THRESHOLD_PPM`: 50 ppm - NH₃ danger threshold
+  - **Based on:** OSHA's PEL for ammonia is 50 ppm and 25 ppm over an 8-hour workday, with levels above 50 ppm causing eye and respiratory irritation.
 
-- `CO2_THRESHOLD_PPM`
-- `TEMP_THRESHOLD_C`
-- `HUMIDITY_THRESHOLD_RH`
-- `H2_THRESHOLD_PPM`
-- `H2S_THRESHOLD_PPM`
-- `NH3_THRESHOLD_PPM`
-- `CH4_THRESHOLD_PPM`
-- `CO_THRESHOLD_PPM`
+- Methane (CH4)
 
-#### I2C LCD Settings
+  - `CH4_WARNING_THRESHOLD_PPM`: 5000 ppm - CH₄ warning threshold
+  - `CH4_DANGER_THRESHOLD_PPM`: 10000 ppm - CH₄ danger threshold
+  - **Based on:** Methane is flammable, with warning and danger thresholds set at 10% and 20% of the Lower Explosive Limit (LEL).
 
-- `LCD_I2C_ADDRESS`: I2C address of the LCD.
-- `LCD_COLUMNS`: Number of columns on the LCD.
-- `LCD_ROWS`: Number of rows on the LCD.
+- Carbon Monoxide (CO)
+  - `CO_WARNING_THRESHOLD_PPM`: 35 ppm - CO warning threshold
+  - `CO_DANGER_THRESHOLD_PPM`: 50 ppm - CO danger threshold
+  - **Based on:** OSHA's PEL for CO is 50 ppm and 25 ppm over an 8-hour workday, with levels above 50 ppm causing headaches and dizziness.
 
-#### Serial Communication Settings
+### `mqgas.h`
 
-- `SERIAL_BAUD_RATE`: Baud rate for Serial communication.
+The MQ gas sensors detect specific gases by measuring the change in their internal resistance when exposed to different gas concentrations. The resistance value (`RS`) changes in proportion to the gas concentration, allowing for the calculation of the gas's parts per million (ppm) level.
 
-#### Debounce Settings
+#### Regression Formula
 
-- `DEBOUNCE_DELAY_MS`: Delay for debouncing the push button.
+The MQ sensors use a logarithmic formula to relate the sensor resistance ratio (`RS / R0`) to gas concentration:
 
-## Sensor Initialization and Calibration
+```c
+ppm = a * (RS / R0)^b
+```
 
-Each sensor is initialized with specific configurations tailored to its detection capabilities. Calibration is essential to ensure accurate readings:
+where:
 
-- **SCD41 Sensor:** Begins periodic measurement upon successful initialization.
-- **ENS160 Sensor:** Configured to operate in standard mode and begins measuring environmental data.
-- **MQ Series Sensors:**
-  - Set regression methods and calibration equations.
-  - If `PERFORM_MQ_CALIBRATION` is `true`, the system calibrates each MQ sensor by taking multiple readings in clean air conditions and calculates the R0 value, which is then stored in EEPROM for future use.
-  - If calibration is disabled, the system retrieves the R0 value from EEPROM.
+- a and b are constants specific to each sensor and gas, derived from calibration and datasheet values.
+- RS is the sensor resistance in the current environment.
+- R0 is the baseline resistance of the sensor in clean air, obtained through calibration.
 
-## Data Logging
+#### Sensor Resistance (RS) Calculation
 
-Sensor data is logged in two ways:
+RS is calculated from the sensor's analog voltage reading as follows:
 
-1. **SD Card Logging:**
-   - Data is recorded in a CSV file (`dataLog.csv`) on the SD card.
-   - Each entry includes a timestamp and readings from all sensors.
-   - The system ensures the CSV file has appropriate headers upon creation.
-2. **Serial Logging:**
-   - If `ENABLE_DATA_PRINTS` is enabled, sensor data is output to Serial in JSON format for real-time monitoring or integration with other systems.
+```c
+RS = ((V_supply - V_sensor) \* RL) / V_sensor
+```
 
-## Alarm System
+where:
 
-The alarm system ensures that any hazardous conditions are promptly notified:
+- V_sensor is the voltage at the sensor’s output.
+- V_supply is the supply voltage to the sensor.
+- RL is the load resistance in series with the sensor.
 
-- **Threshold Checking:**
-  - Each sensor reading is compared against predefined thresholds.
-- **Alarm Activation:**
-  - If any reading exceeds its threshold, the system:
-    - Activates the piezo buzzer for `ALARM_DURATION_MS` milliseconds.
-    - Changes the RGB LED color to red to indicate an alarm state.
-- **Alarm Management:**
-  - The buzzer operates in a non-blocking manner, allowing the system to continue normal operations while the alarm is active.
-  - After the alarm duration, the buzzer is turned off, and the LED reverts to green if no other alarms are active.
+#### Baseline Resistance (R0) Calibration
 
-## LCD Menu Interface
+R0 represents the sensor’s resistance in a known clean air environment and is used as a baseline for gas concentration calculations. During calibration:
 
-The LCD provides a user-friendly interface to monitor environmental data:
+- The sensor's RS is measured in clean air.
+- R0 is calculated as the average RS in this environment and is saved in EEPROM to maintain consistency across power cycles.
 
-- **LiquidMenu Integration:**
-  - Utilizes the LiquidMenu library to create multiple screens displaying different sensor readings.
-- **Navigation:**
-  - Users can navigate through screens using a push button. Each press cycles to the next screen.
-- **Displayed Data:**
-  - **Screen 0:** System title and current timestamp.
-  - **Screen 1-11:** Individual sensor readings including CO₂, temperature, humidity, AQI, TVOC, eCO₂, H₂, H₂S, NH₃, CH₄, and CO concentrations.
+#### Clean Air Ratio
 
-## Pin Configuration
+The clean air ratio (RS / R0 in clean air) is a reference value specific to each sensor. This ratio helps establish the baseline resistance and is used during R0 calibration.
 
-Proper pin configuration ensures reliable communication between the Arduino and connected peripherals:
+#### Sensor Definitions
 
-- **Digital Pins:**
-  - `3`: Red LED
-  - `5`: Green LED
-  - `6`: Blue LED
-  - `7`: Piezo Buzzer
-  - `4`: Relay Control for MQ-9b Heater
-  - `10`: RTC Module Chip Select
-  - `8`: SD Card Module Chip Select
-- **Analog Pins:**
-  - `A0`: MQ-8 Sensor (H₂)
-  - `A1`: MQ-136 Sensor (H₂S)
-  - `A2`: MQ-137 Sensor (NH₃)
-  - `A3`: MQ-9b Sensor (CO & CH₄)
-  - `A6`: Push Button
+- **MQ-8 Sensor (Hydrogen, H₂)**
 
-## Usage Instructions
+  - `MQ8_TYPE`: "MQ-8"
+  - `MQ8_RATIO_CLEAN_AIR`: 70
+  - `A_VALUE_MQ8`: 71.7592
+  - `B_VALUE_MQ8`: -0.9760
+  - `EEPROM_ADDRESS_MQ8_R0`: 0
 
-1. **Setup Hardware:**
+- **MQ-136 Sensor (Hydrogen Sulfide, H₂S)**
 
-   - Connect all sensors to their respective pins as defined in `config.h`.
-   - Ensure the SD card is properly inserted into the SD card module.
-   - Connect the RTC module to the designated chip-select pin.
-   - Attach the RGB LEDs, buzzer, and relay to their respective pins.
-   - Connect the push button to `A6` with appropriate pull-up/down resistors.
+  - `MQ136_TYPE`: "MQ-136"
+  - `MQ136_RATIO_CLEAN_AIR`: 3.6
+  - `A_VALUE_MQ136`: 1.0715
+  - `B_VALUE_MQ136`: -0.8877
+  - `EEPROM_ADDRESS_MQ136_R0`: 4
 
-2. **Configure Software:**
+- **MQ-137 Sensor (Ammonia, NH₃)**
 
-   - Adjust settings in `config.h` as needed, such as enabling/disabling debug prints, calibration, and data logging.
-   - Set appropriate threshold values for each sensor based on environmental safety requirements.
+  - `MQ137_TYPE`: "MQ-137"
+  - `MQ137_RATIO_CLEAN_AIR`: 4.2
+  - `A_VALUE_MQ137`: 1.0613
+  - `B_VALUE_MQ137`: -0.8905
+  - `EEPROM_ADDRESS_MQ137_R0`: 8
 
-3. **Calibration:**
-
-   - If `PERFORM_MQ_CALIBRATION` is set to `true`, calibrate the MQ sensors in clean air conditions to establish baseline readings.
-   - After calibration, set `PERFORM_MQ_CALIBRATION` to `false` to use the stored R0 values from EEPROM.
-
-4. **Running the System:**
-
-   - Upload the `main.ino` sketch to the Arduino Nano.
-   - Upon startup, the system initializes all components and begins monitoring.
-   - Navigate through different sensor data screens using the push button.
-   - Monitor alarms via the buzzer and RGB LED indicators.
-
-5. **Data Access:**
-   - Retrieve the `dataLog.csv` file from the SD card for analysis using spreadsheet software or other data processing tools.
-   - Real-time data can be viewed via Serial Monitor if enabled.
-
-## Troubleshooting
-
-- **SD Card Initialization Failed:**
-
-  - Ensure the SD card is properly inserted.
-  - Verify the chip-select pin is correctly connected.
-  - Check the SD card format (should be FAT16/FAT32).
-
-- **RTC Lost Confidence in DateTime:**
-
-  - Check RTC module connections.
-  - Ensure the RTC has a backup battery for maintaining time.
-
-- **Sensor Not Detected:**
-
-  - Verify wiring connections for each sensor.
-  - Ensure sensors are powered correctly.
-  - Check for I2C address conflicts.
-
-- **Alarms Not Triggering:**
-
-  - Confirm that sensor readings exceed the set thresholds.
-  - Ensure the buzzer and LED pins are correctly connected and functioning.
-
-- **LCD Not Displaying Data:**
-  - Verify I2C connections.
-  - Check the LCD address and dimensions in `config.h`.
-  - Ensure the LiquidMenu library is correctly initialized.
-
-## Conclusion
-
-EnvSafetyMonitor provides a comprehensive solution for real-time environmental monitoring, combining accurate sensor data collection, intuitive user interfaces, reliable data logging, and prompt alarm notifications. Proper setup and calibration are essential for optimal performance, ensuring the system effectively safeguards against hazardous environmental conditions.
-
-For further enhancements, consider integrating wireless data transmission for remote monitoring or expanding the system with additional sensors to cover a broader range of environmental parameters.
+- **MQ-9b Sensor (Carbon Monoxide, CO & Methane, CH₄)**
+  - `MQ9B_TYPE`: "MQ-9"
+  - `MQ9B_RATIO_CLEAN_AIR`: 9.6
+  - `A_VALUE_MQ9B_CH4`: 4.9059
+  - `B_VALUE_MQ9B_CH4`: -0.6699
+  - `A_VALUE_MQ9B_CO`: 4.8726
+  - `B_VALUE_MQ9B_CO`: -0.6989
+  - `EEPROM_ADDRESS_MQ9B_R0`: 12
+  - `SETTLE_TIME_TO_CO`: 20000 ms
+  - `SETTLE_TIME_TO_CH4`: 10000 ms
