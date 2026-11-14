@@ -35,11 +35,11 @@ The enclosure was printed in PETG with a 0.8mm nozzle on a Prusa MK3S+, optimize
 
 #### Fully Assembled Front View
 
-<img src="docs/assets/pic8_fully_assembled.png" alt="Fully Assembled" width="400"/>
+<img src="docs/assets/pic8_fully_assembled.jpg" alt="Fully Assembled" width="400"/>
 
 #### Empty Enclosure
 
-<img src="docs/assets/pic7_3dp_enclosure.png" alt="3D Printed Enclosure" width="400"/>
+<img src="docs/assets/pic7_3dp_enclosure.jpg" alt="3D Printed Enclosure" width="400"/>
 
 ### Sensor and Component Placement
 
@@ -47,11 +47,11 @@ This board includes the SCD41 for temperature, humidity, and carbon dioxide (COâ
 
 #### Sensor Components Mounted
 
-<img src="docs/assets/pic3_sensors_populated.png" alt="Sensors Populated" width="500"/>
+<img src="docs/assets/pic3_sensors_populated.jpg" alt="Sensors Populated" width="500"/>
 
 #### GUI and Control Panel Mounted
 
-<img src="docs/assets/pic4_gui_populated.png" alt="GUI Populated" width="500"/>
+<img src="docs/assets/pic4_gui_populated.jpg" alt="GUI Populated" width="500"/>
 
 ### Soldered Boards
 
@@ -59,8 +59,8 @@ Two views of the soldered board showing component placement and wiring.
 
 #### Soldered Front View
 
-<img src="docs/assets/pic1_soldered_back.png" alt="Soldered Front 1" width="500"/>
-<img src="docs/assets/pic2_soldered_front.png" alt="Soldered Front 2" width="500"/>
+<img src="docs/assets/pic1_soldered_back.jpg" alt="Soldered Front 1" width="500"/>
+<img src="docs/assets/pic2_soldered_front.jpg" alt="Soldered Front 2" width="500"/>
 
 ### Calibration and Testing
 
@@ -70,13 +70,13 @@ Future work will focus on establishing standard calibration procedures, includin
 
 #### Voltage Tuning
 
-<img src="docs/assets/pic6_tuning_bivoltage.png" alt="Voltage Tuning" width="500"/>
+<img src="docs/assets/pic6_tuning_bivoltage.jpg" alt="Voltage Tuning" width="500"/>
 
 ### Installed in Environment
 
 Once assembled, the monitor was installed and tested in a mobile photovoltaic (PV) box used for electrolysis experiments on wastewater.
 
-<img src="docs/assets/pic9_installed.png" alt="Installed" width="500"/>
+<img src="docs/assets/pic9_installed.jpg" alt="Installed" width="500"/>
 
 ### License
 
