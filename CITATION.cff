@@ -1,11 +1,11 @@
 cff-version: 1.2.0
 message: "If you use this monitor, please cite the paper below."
-title: "EnvSafetyLogger"
+title: "multi-gas-monitor"
 type: software
 authors:
   - family-names: "Brooks"
     given-names: "Cameron K."
-url: "https://github.com/uwo-fast/EnvSafetyLogger"
+url: "https://github.com/uwo-fast/multi-gas-monitor"
 preferred-citation:
   type: article
   title: "Portable Solar-Integrated Open-Source Chemistry Lab for Water Treatment with Electrolysis"
