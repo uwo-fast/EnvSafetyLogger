@@ -1,6 +1,6 @@
 # Docs
 
-_EnvSafetyLogger: environmental safety monitoring and logging_
+_multi-gas-monitor: environmental safety monitoring and logging_
 
 The [`assets`](assets/) folder contains images related to design and build; [`datasheets`](mq-datasheets/) contains datasheets for hardware components used in the build.
 
@@ -17,7 +17,7 @@ The [`assets`](assets/) folder contains images related to design and build; [`da
 
 ## Introduction
 
-EnvSafetyLogger is an environmental safety monitoring system designed to continuously monitor various environmental parameters to ensure safety and compliance. The system leverages multiple sensors to detect levels of gases, temperature, and humidity, providing real-time data visualization, logging, and alarm notifications.
+This multi-gas monitor is an environmental safety monitoring system designed to continuously monitor various environmental parameters to ensure safety and compliance. The system leverages multiple sensors to detect levels of gases, temperature, and humidity, providing real-time data visualization, logging, and alarm notifications.
 
 ## System Overview
 

@@ -1,4 +1,4 @@
-# EnvSafetyLogger
+# multi-gas-monitor
 
 An environmental safety monitor and data logger. It measures CO₂, temperature and
 humidity, air quality, and five gases (H₂, H₂S, NH₃, CH₄ and CO), shows them on an
@@ -9,7 +9,7 @@ It was built for the portable solar-powered electrochemistry station described i
 Antonini et al. (2025), [doi:10.3390/technologies13020057](https://doi.org/10.3390/technologies13020057),
 where it monitored the air inside the station during electrolysis experiments. The
 version published with the paper is tagged
-[v1.0.0](https://github.com/uwo-fast/EnvSafetyLogger/releases/tag/v1.0.0).
+[v1.0.0](https://github.com/uwo-fast/multi-gas-monitor/releases/tag/v1.0.0).
 
 <img src="docs/assets/pic8_fully_assembled.jpg" alt="The assembled monitor in its enclosure" width="400"/>
 
@@ -108,7 +108,7 @@ The ppm conversion uses coefficients fitted to the Winsen datasheet curves in 20
 A later re-derivation gives different coefficients; until that update is made and
 checked against a reference gas, use the gas channels for relative changes rather
 than absolute ppm or the alarm thresholds. See
-[#1](https://github.com/uwo-fast/EnvSafetyLogger/issues/1).
+[#1](https://github.com/uwo-fast/multi-gas-monitor/issues/1).
 
 ## Future work
 
