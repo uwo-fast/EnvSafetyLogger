@@ -1,6 +1,7 @@
 # Firmware Docs
 
-Welcome to the firmware docs! Here you will find...fuinish
+How the firmware is organised, and what each setting does. To build it, see
+[Building the firmware](../README.md#building-the-firmware).
 
 ## Software Structure
 
@@ -35,7 +36,7 @@ The program monitors environmental safety parameters using various sensors and l
 
 ### `config.h`
 
-This header file contains all configurable settings, pin definitions, thresholds, and other constants used throughout the EnvSafetyMonitor system.
+This header file contains all configurable settings, pin definitions, thresholds, and other constants used throughout the firmware.
 
 - Debugging Settings
   - `ENABLE_DEBUG_PRINTS`: Toggle for enabling/disabling debug messages.
@@ -111,7 +112,7 @@ The following thresholds are used to trigger warning and danger alarms for vario
   - `CO_DANGER_THRESHOLD_PPM`: 50 ppm - CO danger threshold
   - **Based on:** OSHA's PEL for CO is 50 ppm and 25 ppm over an 8-hour workday, with levels above 50 ppm causing headaches and dizziness.
 
-### `mqgas.h`
+### `mqGas.h`
 
 The MQ gas sensors detect specific gases by measuring the change in their internal resistance when exposed to different gas concentrations. The resistance value (`RS`) changes in proportion to the gas concentration, allowing for the calculation of the gas's parts per million (ppm) level.
 

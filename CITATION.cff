@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this monitor, please cite the paper below."
+title: "EnvSafetyLogger"
+type: software
+authors:
+  - family-names: "Brooks"
+    given-names: "Cameron K."
+url: "https://github.com/uwo-fast/EnvSafetyLogger"
+preferred-citation:
+  type: article
+  title: "Portable Solar-Integrated Open-Source Chemistry Lab for Water Treatment with Electrolysis"
+  authors:
+    - family-names: "Antonini"
+      given-names: "Giorgio"
+    - family-names: "Rahman"
+      given-names: "Md Motakabbir"
+    - family-names: "Brooks"
+      given-names: "Cameron"
+    - family-names: "Santoro"
+      given-names: "Domenico"
+    - family-names: "Muller"
+      given-names: "Christopher"
+    - family-names: "Al-Omari"
+      given-names: "Ahmed"
+    - family-names: "Bell"
+      given-names: "Katherine"
+    - family-names: "Pearce"
+      given-names: "Joshua M."
+  journal: "Technologies"
+  volume: 13
+  issue: 2
+  start: "57"
+  year: 2025
+  doi: "10.3390/technologies13020057"

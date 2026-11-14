@@ -1,83 +1,138 @@
 # EnvSafetyLogger
 
-An environmental monitoring system for industrial safety, featuring multi-gas sensors, temperature, humidity, data logging, and alerts.
+An environmental safety monitor and data logger. It measures CO₂, temperature and
+humidity, air quality, and five gases (H₂, H₂S, NH₃, CH₄ and CO), shows them on an
+LCD, sounds an alarm above set thresholds, and logs timestamped readings to an SD
+card.
 
-This project involves designing an environmental safety monitor to measure and log air quality parameters. The monitor is housed in a custom 3D-printed enclosure and is built using a variety of sensors to measure gases and environmental conditions.
+It was built for the portable solar-powered electrochemistry station described in
+Antonini et al. (2025), [doi:10.3390/technologies13020057](https://doi.org/10.3390/technologies13020057),
+where it monitored the air inside the station during electrolysis experiments. The
+version published with the paper is tagged
+[v1.0.0](https://github.com/uwo-fast/EnvSafetyLogger/releases/tag/v1.0.0).
 
-## Future Work
+<img src="docs/assets/pic8_fully_assembled.jpg" alt="The assembled monitor in its enclosure" width="400"/>
 
-Future work includes:
+## What's here
 
-- Weather-resistant enclosure (standard ingress protection)
-- Wireless connectivity to enable data transmission and remote monitoring
-- Improved calibration and integration of MQ sensors
-  - See [CameronBrooks11/MQ-xx](https://github.com/CameronBrooks11/MQ-xx) for initial work involving extraction of regression parameters from component datasheets
-- PCB design
-- Variation for measuring closed systems with directed sampling
-- Use Wet Bulb Globe Temperature (WBGT) as measure of heat stress conditions
-  - WBGT is a measure of how hot it feels in direct sunlight, taking into account temperature, humidity, wind, and sun
+| Path | What it is |
+| --- | --- |
+| `firmware/main/` | The Arduino Nano Every firmware: `main.ino`, with settings in `config.h`, gas sensor coefficients in `mqGas.h` and alarm levels in `alarmThresholds.h`. See [`firmware/README.md`](firmware/README.md). |
+| `hardware/` | The KiCad schematic, with PDF and SVG exports. |
+| `docs/` | Build and usage notes ([`docs/README.md`](docs/README.md)), the bill of materials (`BOM_v0.ods`), photos, the MQ sensor datasheets, and the logged data (6 to 17 November 2024) with the scripts that plotted it. |
 
-## Results
+The 3D-printed enclosure is designed in
+[Onshape](https://cad.onshape.com/documents/19c4dfddea3c27460450ef2e/w/2ec8d1afb4664a197accd547/e/7aca4c51ab1e6bf835721462).
+
+## Hardware
 
 ### Schematic
 
-The schematic shows the full circuit layout, including the Arduino Nano Every as the main controller, the various sensors, GUI components, and supporting circuitry. The schematic can be found in the `hardware` folder and is designed using KiCad.
+The full circuit: the Arduino Nano Every, the sensors, the LCD, button, LED and
+buzzer, and supporting circuitry. Designed in KiCad; the files are in `hardware/`.
 
 <img src="docs/assets/pic0_schematic.png" alt="Schematic" width="600"/>
 
-### Firmware and Hardware
+### Sensors and components
 
-The firmware for the EnvSafetyLogger is written in `.ino` format with configuration files in `.h` format, located in the `firmware` folder.
+- **SCD41:** CO₂, temperature and humidity.
+- **ENS160:** air quality index (AQI), total VOCs and eCO₂.
+- **MQ-series gas sensors:** MQ-8 (H₂), MQ-136 (H₂S), MQ-137 (NH₃) and MQ-9B (CO
+  and CH₄).
+- Circuitry to drive the MQ sensor heaters, an RGB LED and piezo buzzer for alarms,
+  an SD card and real-time clock for timestamped logging, and an I2C LCD with a push
+  button to page through readings.
 
-### 3D-Printed Enclosure
+The board is built to be modular and serviceable while staying rigid, with headers
+and standoffs for every component.
 
-The enclosure was printed in PETG with a 0.8mm nozzle on a Prusa MK3S+, optimized to print without supports. The source file for the CAD design can be found [here on Onshape](https://cad.onshape.com/documents/19c4dfddea3c27460450ef2e/w/2ec8d1afb4664a197accd547/e/7aca4c51ab1e6bf835721462).
+<img src="docs/assets/pic3_sensors_populated.jpg" alt="Sensors mounted on the board" width="500"/>
 
-#### Fully Assembled Front View
+<img src="docs/assets/pic4_gui_populated.jpg" alt="LCD, button and LED mounted on the board" width="500"/>
 
-<img src="docs/assets/pic8_fully_assembled.jpg" alt="Fully Assembled" width="400"/>
+### Soldered board
 
-#### Empty Enclosure
+The board from the component side and from the solder side.
 
-<img src="docs/assets/pic7_3dp_enclosure.jpg" alt="3D Printed Enclosure" width="400"/>
+<img src="docs/assets/pic2_soldered_front.jpg" alt="Soldered board, component side" width="500"/>
+<img src="docs/assets/pic1_soldered_back.jpg" alt="Soldered board, solder side" width="500"/>
 
-### Sensor and Component Placement
+### Enclosure
 
-This board includes the SCD41 for temperature, humidity, and carbon dioxide (CO₂); the ENS160 air quality sensor (AQI, TVOCs, eCO₂); various MQ-series gas sensors (MQ-8 for H₂, MQ-136 for H₂S, MQ-137 for NH₃, and MG-9B for CO and CH₄); and additional circuitry for driving the MQ sensor heaters, triggering audio-visual alarms, logging timestamped data, and displaying information. The board is constructed to be modular and serviceable while still being mechanically rigid and reliable, using headers and standoffs for all components.
+Printed in PETG with a 0.8 mm nozzle on a Prusa MK3S+, designed to print without
+supports.
 
-#### Sensor Components Mounted
+<img src="docs/assets/pic7_3dp_enclosure.jpg" alt="The empty 3D-printed enclosure" width="400"/>
 
-<img src="docs/assets/pic3_sensors_populated.jpg" alt="Sensors Populated" width="500"/>
+### MQ-9B heater tuning
 
-#### GUI and Control Panel Mounted
+The MQ-9B, which detects CO and CH₄, needs its heater cycled between a low and a
+high voltage. A relay switches between them, and a trimmer pot sets the relay's
+normally-open output to 1.5 V for the low phase. Headers let the heater line be
+disconnected and an LED put in its place, to check the heater cycle without the
+sensor.
 
-<img src="docs/assets/pic4_gui_populated.jpg" alt="GUI Populated" width="500"/>
+<img src="docs/assets/pic6_tuning_bivoltage.jpg" alt="Tuning the MQ-9B heater voltage" width="500"/>
 
-### Soldered Boards
+### Installed
 
-Two views of the soldered board showing component placement and wiring.
+Installed and tested in the mobile photovoltaic station used for electrolysis
+experiments on wastewater.
 
-#### Soldered Front View
+<img src="docs/assets/pic9_installed.jpg" alt="The monitor installed in the station" width="500"/>
 
-<img src="docs/assets/pic1_soldered_back.jpg" alt="Soldered Front 1" width="500"/>
-<img src="docs/assets/pic2_soldered_front.jpg" alt="Soldered Front 2" width="500"/>
+## Building the firmware
 
-### Calibration and Testing
+`just setup` installs the Nano Every core and the libraries the firmware uses, at
+the versions CI builds with, and `just check` compiles it. Both need
+[arduino-cli](https://arduino.github.io/arduino-cli/) and
+[just](https://github.com/casey/just).
 
-Testing and tuning were performed to ensure accurate sensor readings. The MQ9B sensor, which detects CO and CH₄, requires a bi-voltage heater cycling to operate correctly, switching between low and high voltages to improve sensitivity and response time. A trimmer pot on the board is tuned to set the relay's NO (normally open) output to 1.5V, which is used to control the heater cycle. Headers are provided to facilitate testing and allow for disconnecting the line to the MQ9B heater pin. This setup enables switching to an LED for testing without affecting the MQ9B sensor, making it easier to validate heater operation independently.
+The LCD menu library, LiquidMenu, defaults to a parallel LCD, and this board's LCD
+is I2C. `just check` selects the I2C library with two compiler flags:
 
-Future work will focus on establishing standard calibration procedures, including regression curve fitting of the sensor's analog signal to match the expected ppm range, and compensating this fitted curve for environmental factors such as temperature and humidity to improve accuracy.
+```text
+-DLIQUIDMENU_LIBRARY=LiquidCrystal_I2C_LIBRARY -DDisplayClass=LiquidCrystal_I2C
+```
 
-#### Voltage Tuning
+In the Arduino IDE, make the same choice in the installed library's
+`LiquidMenu_config.h` instead: comment out the `LiquidCrystal` block and uncomment
+the `LiquidCrystal_I2C` one.
 
-<img src="docs/assets/pic6_tuning_bivoltage.jpg" alt="Voltage Tuning" width="500"/>
+Calibration and the rest of setup are in [`docs/README.md`](docs/README.md).
 
-### Installed in Environment
+## Calibration status
 
-Once assembled, the monitor was installed and tested in a mobile photovoltaic (PV) box used for electrolysis experiments on wastewater.
+The ppm conversion uses coefficients fitted to the Winsen datasheet curves in 2024.
+A later re-derivation gives different coefficients; until that update is made and
+checked against a reference gas, use the gas channels for relative changes rather
+than absolute ppm or the alarm thresholds. See
+[#1](https://github.com/uwo-fast/EnvSafetyLogger/issues/1).
 
-<img src="docs/assets/pic9_installed.jpg" alt="Installed" width="500"/>
+## Future work
 
-### License
+- A weather-resistant enclosure with a standard ingress-protection rating.
+- Wireless connectivity for remote monitoring.
+- Better MQ sensor calibration, building on
+  [CameronBrooks11/MQGasSensors](https://github.com/CameronBrooks11/MQGasSensors),
+  which re-derives the sensors' coefficients from their datasheets.
+- A PCB in place of the protoboard.
+- A variant that samples a closed system through a directed inlet.
+- Wet Bulb Globe Temperature (WBGT), a measure of heat stress that accounts for
+  temperature, humidity, wind and sun.
 
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0). See the `LICENSE` file for details.
+## Citation
+
+If you use this monitor, please cite the paper (also in
+[`CITATION.cff`](CITATION.cff)):
+
+> Antonini, G., Rahman, M. M., Brooks, C., Santoro, D., Muller, C., Al-Omari, A.,
+> Bell, K., & Pearce, J. M. (2025). Portable Solar-Integrated Open-Source Chemistry
+> Lab for Water Treatment with Electrolysis. *Technologies*, 13(2), 57.
+> <https://doi.org/10.3390/technologies13020057>
+
+The paper's other designs and data are on OSF: <https://osf.io/fbdgc/>.
+
+## Licence
+
+GNU General Public License v3.0. See [`LICENSE`](LICENSE).
