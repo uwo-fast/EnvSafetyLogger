@@ -4,7 +4,7 @@ import matplotlib.dates as mdates
 import os
 
 # Parameters for easy adjustment
-csv_file = os.path.join(os.path.dirname(__file__), "DATALOG1.csv")
+csv_file = os.path.join(os.path.dirname(__file__), "DATALOG1.CSV")
 timestamp_col = "Timestamp"  # Column name for timestamp
 rolling_window_size = 30  # Rolling window size for smoothing
 show_title = False  # Toggle to show or hide the title
