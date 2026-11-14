@@ -1,3 +1,6 @@
+#ifndef ALARM_THRESHOLDS_H
+#define ALARM_THRESHOLDS_H
+
 // ------------------------------
 // Alarm Thresholds
 // ------------------------------
@@ -47,3 +50,5 @@
 // OSHA's PEL for CO is 50 ppm and 25 ppm over an 8-hour workday.
 // Levels above 50 ppm can cause headaches and dizziness.
 // Source: https://www.osha.gov/annotated-pels/table-z-1
+
+#endif // ALARM_THRESHOLDS_H
