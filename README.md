@@ -136,4 +136,6 @@ The paper's other designs and data are on OSF: <https://osf.io/fbdgc/>.
 
 ## Licence
 
-GNU General Public License v3.0. See [`LICENSE`](LICENSE).
+The firmware is `GPL-3.0-or-later`, the hardware design `CERN-OHL-S-2.0`, and the
+logged data `CC-BY-4.0`. [`LICENSING.md`](LICENSING.md) says which files each
+covers; the texts are in [`LICENSES/`](LICENSES/).
