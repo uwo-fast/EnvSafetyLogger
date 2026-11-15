@@ -2,7 +2,7 @@
 
 ## Datasheets
 
-The board uses Winsen's manuals for its four MQ sensors. Winsen's copyright notice
+The four MQ sensors on the board are documented in Winsen's manuals. Winsen's copyright notice
 forbids redistributing them, so they are linked rather than stored here. Each link
 is an Internet Archive snapshot that returns the original file; the SHA-256 lets you
 check a copy from anywhere else. The same editions are pinned, with further
