@@ -81,7 +81,9 @@ LiquidMenu has to be set to use the I2C LCD library; see
 
 4. **Data:** the log file (`LOG_FILE_NAME` in `config.h`) on the SD card is a
    CSV. With `ENABLE_DATA_PRINTS` set to `true`, the firmware also prints each
-   reading on the serial port at 115200 baud, one JSON object per line.
+   reading on the serial port at 115200 baud, one JSON-style object per line. A gas
+   with no valid reading in the current heater phase prints as a bare `NaN`, which
+   strict JSON parsers reject.
 
 ## Troubleshooting
 
