@@ -5709,7 +5709,7 @@
 		)
 		(uuid "0ae139bd-06cb-47ea-bd09-9915f87cd320")
 	)
-	(text "Trimmer set \nto output\n1V8 on wiper"
+	(text "Trimmer set \nto output\n1V5 on wiper"
 		(exclude_from_sim no)
 		(at 101.092 98.044 0)
 		(effects
