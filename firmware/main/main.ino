@@ -98,8 +98,8 @@ const unsigned long BUZZER_TOGGLE_INTERVAL_MS = 1000; // 1 second
 
 // MQ-9b Relay Control Variables
 unsigned long mq9bPreviousMillis = 0;
-unsigned long mq9bInterval = 60000; // 60 seconds for HIGH (5V) phase
-bool mq9bHighState = true;          // Start in the HIGH (5V) phase
+unsigned long mq9bInterval = 60000; // 60 seconds for the 5 V heater phase
+bool mq9bHighState = true;          // Start in the 5 V heater phase (relay coil off)
 unsigned long mq9bSwitchTime = 0;   // Time when MQ-9b relay was switched
 
 // Timing Variable for Sensor Sampling
@@ -987,7 +987,7 @@ void controlMQ9bRelay()
 
 #if ENABLE_DEBUG_PRINTS
         Serial.print(F("Relay Switched: "));
-        Serial.println(mq9bHighState ? "HIGH (CH4 detection)" : "LOW (CO detection)");
+        Serial.println(mq9bHighState ? "5 V heater (CH4 detection)" : "1.5 V heater (CO detection)");
 #endif
 
         // Update timing interval
