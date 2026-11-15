@@ -590,7 +590,7 @@ void initializePins()
     pinMode(buzzerPin, OUTPUT);
 
     // Button Pin
-    pinMode(buttonPin, INPUT_PULLUP); // Assuming button connected to GND when pressed
+    pinMode(buttonPin, INPUT); // Button pulls A6 to +5 V; R10 (10k) pulls it to GND
 
     // Relay Pin for MQ-9b
     pinMode(relayPin, OUTPUT);
@@ -754,7 +754,7 @@ void handleButtonPress()
         if (reading != buttonState)
         {
             buttonState = reading;
-            if (buttonState == LOW)
+            if (buttonState == HIGH)
             { // Button pressed
                 menu.next_screen();
                 // LED color no longer changes on button press

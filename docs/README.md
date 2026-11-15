@@ -34,9 +34,8 @@ From `firmware/main/config.h`:
 | RTC chip select | D10 |
 | SD card chip select | D8 |
 
-The firmware sets the button pin to `INPUT_PULLUP` and counts a LOW reading as a
-press, so it expects the button to connect A6 to GND. The schematic instead draws
-the button to +5 V with a 10k pull-down (R10). The two disagree.
+The button connects A6 to +5 V, and R10 (10k) pulls A6 to GND, so a press reads
+HIGH.
 
 ## Software Dependencies
 
