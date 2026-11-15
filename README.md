@@ -66,8 +66,9 @@ supports.
 
 The MQ-9B, which detects CO and CH4, needs its heater cycled between two
 voltages. Its Winsen manual (see [MQ sensor datasheets](docs/mq-datasheets/README.md))
-specifies 5 V for 60 s and 1.5 V for 90 s. A relay switches the heater between
-5 V and the wiper of a trimmer pot, which is set to 1.5 V with a meter
+specifies 5 V for 60 s and 1.5 V for 90 s. A relay switches the heater: its
+normally-closed contact gives 5 V, and its normally-open contact the wiper of a
+trimmer pot, which is set to 1.5 V with a meter
 ([photo](docs/assets/pic6_tuning_bivoltage.jpg)). The firmware runs the same
 cycle, 60 s at 5 V then 90 s at 1.5 V, and reads CH4 in the high phase and CO in
 the low phase. Headers let the heater line be disconnected and an LED put in its

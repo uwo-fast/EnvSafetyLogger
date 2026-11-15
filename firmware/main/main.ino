@@ -504,8 +504,8 @@ void setup()
     analogWrite(greenPin, 255);
     analogWrite(bluePin, 0);
 
-    // Initialize Relay for MQ-9b (Start in HIGH state - 5V)
-    digitalWrite(relayPin, HIGH); // HIGH corresponds to 5V phase
+    // Initialize Relay for MQ-9b (start in the 5 V phase)
+    digitalWrite(relayPin, LOW); // Coil off: the NC contact gives the heater 5 V
     mq9bSwitchTime = millis();    // Initialize the switch time
 
 #if ENABLE_DEBUG_PRINTS
@@ -597,7 +597,7 @@ void initializePins()
 
     // Ensure alarms and relay are in their initial states
     digitalWrite(buzzerPin, LOW);
-    digitalWrite(relayPin, HIGH); // Start in HIGH (5V) position
+    digitalWrite(relayPin, LOW); // Start in the 5 V phase (coil off)
     analogWrite(redPin, 0);
     analogWrite(greenPin, 0);
     analogWrite(bluePin, 0);
@@ -979,7 +979,8 @@ void controlMQ9bRelay()
     {
         // Toggle relay state
         mq9bHighState = !mq9bHighState;
-        digitalWrite(relayPin, mq9bHighState ? HIGH : LOW);
+        // Coil on switches the heater to the trimmer wiper (1.5 V)
+        digitalWrite(relayPin, mq9bHighState ? LOW : HIGH);
 
         // Update mq9bSwitchTime
         mq9bSwitchTime = currentMillis;
