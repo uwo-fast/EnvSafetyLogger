@@ -65,24 +65,10 @@ those terms.
 Both GPL-3.0 (section 11) and CERN-OHL-S-2.0 (section 7) contain express patent
 provisions. Review them before using, modifying, or distributing this project.
 
-## Disclaimer of warranty and liability
+## Additional disclaimer
 
-A summary of terms in the licences themselves — GPL-3.0 sections 15–17 and
-CERN-OHL-S-2.0 section 6.
-
-THIS PROJECT, INCLUDING ALL SOFTWARE AND HARDWARE DESIGNS, IS PROVIDED "AS IS"
-WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-NON-INFRINGEMENT.
-
-TO THE EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE AUTHORS,
-CONTRIBUTORS, OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
-LIABILITY ARISING FROM, OUT OF, OR IN CONNECTION WITH THIS PROJECT.
-
-### Additional disclaimer
-
-The following is not a summary of either licence. It is an additional disclaimer of
-the kind GPL-3.0 section 7(a) permits, offered alongside them:
+This is not part of either licence. It is an additional disclaimer of the kind
+GPL-3.0 section 7(a) permits, offered alongside them:
 
 HARDWARE DESIGNS HERE HAVE NOT BEEN INDEPENDENTLY VERIFIED OR CERTIFIED FOR SAFETY
 OR REGULATORY COMPLIANCE. ANY PHYSICAL PRODUCT MANUFACTURED FROM THEM IS PRODUCED
