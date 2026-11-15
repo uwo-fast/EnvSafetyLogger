@@ -1,7 +1,7 @@
 # multi-gas-monitor
 
-An environmental safety monitor and data logger. It measures CO₂, temperature and
-humidity, air quality, and five gases (H₂, H₂S, NH₃, CH₄ and CO), shows them on an
+An environmental safety monitor and data logger. It measures CO2, temperature and
+humidity, air quality, and five gases (H2, H2S, NH3, CH4 and CO), shows them on an
 LCD, sounds an alarm above set thresholds, and logs timestamped readings to an SD
 card.
 
@@ -19,7 +19,7 @@ version published with the paper is tagged
 | --- | --- |
 | `firmware/main/` | The Arduino Nano Every firmware: `main.ino`, with settings in `config.h`, gas sensor coefficients in `mqGas.h` and alarm levels in `alarmThresholds.h`. See [`firmware/README.md`](firmware/README.md). |
 | `hardware/` | The KiCad schematic, with PDF and SVG exports. |
-| `docs/` | Build and usage notes ([`docs/README.md`](docs/README.md)), the bill of materials (`BOM_v0.ods`), photos and links to the MQ sensor datasheets. |
+| `docs/` | Build and usage notes ([`docs/README.md`](docs/README.md)), the bill of materials ([`BOM_v0.ods`](docs/BOM_v0.ods)), photos and links to the MQ sensor datasheets. |
 | `data/` | Logs from the station, 6 to 17 November 2024, with the scripts that plot them ([`data/2024-11-pv-box/`](data/2024-11-pv-box/README.md)). |
 
 The 3D-printed enclosure is designed in
@@ -29,31 +29,28 @@ The 3D-printed enclosure is designed in
 
 ### Schematic
 
-The full circuit: the Arduino Nano Every, the sensors, the LCD, button, LED and
-buzzer, and supporting circuitry. Designed in KiCad; the files are in `hardware/`.
+KiCad source in `hardware/`.
 
 <img src="docs/assets/pic0_schematic.png" alt="Schematic" width="600"/>
 
 ### Sensors and components
 
-- **SCD41:** CO₂, temperature and humidity.
-- **ENS160:** air quality index (AQI), total VOCs and eCO₂.
-- **MQ-series gas sensors:** MQ-8 (H₂), MQ-136 (H₂S), MQ-137 (NH₃) and MQ-9B (CO
-  and CH₄).
+- **SCD41:** CO2, temperature and humidity.
+- **ENS160:** air quality index (AQI), total VOCs and eCO2.
+- **MQ-series gas sensors:** MQ-8 (H2), MQ-136 (H2S), MQ-137 (NH3) and MQ-9B (CO
+  and CH4).
 - Circuitry to drive the MQ sensor heaters, an RGB LED and piezo buzzer for alarms,
   an SD card and real-time clock for timestamped logging, and an I2C LCD with a push
   button to page through readings.
 
-The board is built to be modular and serviceable while staying rigid, with headers
-and standoffs for every component.
+The parts plug into 2.54 mm female headers on a 10 x 15 cm protoboard, which
+sits on M3 nylon standoffs.
 
 <img src="docs/assets/pic3_sensors_populated.jpg" alt="Sensors mounted on the board" width="500"/>
 
 <img src="docs/assets/pic4_gui_populated.jpg" alt="LCD, button and LED mounted on the board" width="500"/>
 
 ### Soldered board
-
-The board from the component side and from the solder side.
 
 <img src="docs/assets/pic2_soldered_front.jpg" alt="Soldered board, component side" width="500"/>
 <img src="docs/assets/pic1_soldered_back.jpg" alt="Soldered board, solder side" width="500"/>
@@ -67,11 +64,15 @@ supports.
 
 ### MQ-9B heater tuning
 
-The MQ-9B, which detects CO and CH₄, needs its heater cycled between a low and a
-high voltage. A relay switches between them, and a trimmer pot sets the relay's
-normally-open output to 1.5 V for the low phase. Headers let the heater line be
-disconnected and an LED put in its place, to check the heater cycle without the
-sensor.
+The MQ-9B, which detects CO and CH4, needs its heater cycled between two
+voltages. Its Winsen manual (see [MQ sensor datasheets](docs/mq-datasheets/README.md))
+specifies 5 V for 60 s and 1.5 V for 90 s. A relay switches the heater: its
+normally-closed contact gives 5 V, and its normally-open contact the wiper of a
+trimmer pot, which is set to 1.5 V with a meter
+([photo](docs/assets/pic6_tuning_bivoltage.jpg)). The firmware runs the same
+cycle, 60 s at 5 V then 90 s at 1.5 V, and reads CH4 in the high phase and CO in
+the low phase. Headers let the heater line be disconnected and an LED put in its
+place, to check the heater cycle without the sensor.
 
 <img src="docs/assets/pic6_tuning_bivoltage.jpg" alt="Tuning the MQ-9B heater voltage" width="500"/>
 
@@ -114,9 +115,6 @@ than absolute ppm or the alarm thresholds. See
 
 - A weather-resistant enclosure with a standard ingress-protection rating.
 - Wireless connectivity for remote monitoring.
-- Better MQ sensor calibration, building on
-  [CameronBrooks11/MQGasSensors](https://github.com/CameronBrooks11/MQGasSensors),
-  which re-derives the sensors' coefficients from their datasheets.
 - A PCB in place of the protoboard.
 - A variant that samples a closed system through a directed inlet.
 - Wet Bulb Globe Temperature (WBGT), a measure of heat stress that accounts for

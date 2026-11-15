@@ -86,8 +86,8 @@ float ch4_ppm = 0.0; // Methane concentration
 float co_ppm = 0.0;  // Carbon Monoxide concentration
 
 // Button Debounce Variables
-bool buttonState = HIGH;
-bool lastButtonState = HIGH;
+bool buttonState = LOW;
+bool lastButtonState = LOW;
 unsigned long lastDebounceTime = 0;
 
 // Alarm Variables
@@ -98,8 +98,8 @@ const unsigned long BUZZER_TOGGLE_INTERVAL_MS = 1000; // 1 second
 
 // MQ-9b Relay Control Variables
 unsigned long mq9bPreviousMillis = 0;
-unsigned long mq9bInterval = 60000; // 60 seconds for HIGH (5V) phase
-bool mq9bHighState = true;          // Start in the HIGH (5V) phase
+unsigned long mq9bInterval = 60000; // 60 seconds for the 5 V heater phase
+bool mq9bHighState = true;          // Start in the 5 V heater phase (relay coil off)
 unsigned long mq9bSwitchTime = 0;   // Time when MQ-9b relay was switched
 
 // Timing Variable for Sensor Sampling
@@ -504,8 +504,8 @@ void setup()
     analogWrite(greenPin, 255);
     analogWrite(bluePin, 0);
 
-    // Initialize Relay for MQ-9b (Start in HIGH state - 5V)
-    digitalWrite(relayPin, HIGH); // HIGH corresponds to 5V phase
+    // Initialize Relay for MQ-9b (start in the 5 V phase)
+    digitalWrite(relayPin, LOW); // Coil off: the NC contact gives the heater 5 V
     mq9bSwitchTime = millis();    // Initialize the switch time
 
 #if ENABLE_DEBUG_PRINTS
@@ -590,14 +590,14 @@ void initializePins()
     pinMode(buzzerPin, OUTPUT);
 
     // Button Pin
-    pinMode(buttonPin, INPUT_PULLUP); // Assuming button connected to GND when pressed
+    pinMode(buttonPin, INPUT); // Button pulls A6 to +5 V; R10 (10k) pulls it to GND
 
     // Relay Pin for MQ-9b
     pinMode(relayPin, OUTPUT);
 
     // Ensure alarms and relay are in their initial states
     digitalWrite(buzzerPin, LOW);
-    digitalWrite(relayPin, HIGH); // Start in HIGH (5V) position
+    digitalWrite(relayPin, LOW); // Start in the 5 V phase (coil off)
     analogWrite(redPin, 0);
     analogWrite(greenPin, 0);
     analogWrite(bluePin, 0);
@@ -754,7 +754,7 @@ void handleButtonPress()
         if (reading != buttonState)
         {
             buttonState = reading;
-            if (buttonState == LOW)
+            if (buttonState == HIGH)
             { // Button pressed
                 menu.next_screen();
                 // LED color no longer changes on button press
@@ -979,14 +979,15 @@ void controlMQ9bRelay()
     {
         // Toggle relay state
         mq9bHighState = !mq9bHighState;
-        digitalWrite(relayPin, mq9bHighState ? HIGH : LOW);
+        // Coil on switches the heater to the trimmer wiper (1.5 V)
+        digitalWrite(relayPin, mq9bHighState ? LOW : HIGH);
 
         // Update mq9bSwitchTime
         mq9bSwitchTime = currentMillis;
 
 #if ENABLE_DEBUG_PRINTS
         Serial.print(F("Relay Switched: "));
-        Serial.println(mq9bHighState ? "HIGH (CH4 detection)" : "LOW (CO detection)");
+        Serial.println(mq9bHighState ? "5 V heater (CH4 detection)" : "1.5 V heater (CO detection)");
 #endif
 
         // Update timing interval

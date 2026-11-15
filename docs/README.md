@@ -1,59 +1,50 @@
 # Docs
 
-_multi-gas-monitor: environmental safety monitoring and logging_
+Build and usage notes. The MQ sensor datasheets and the gas calculation are in
+[MQ sensor datasheets](mq-datasheets/README.md).
 
-The [`assets`](assets/) folder contains images related to design and build; [`mq-datasheets`](mq-datasheets/) links the MQ sensors' datasheets and explains how MQ sensors are read and calibrated.
+## Hardware
 
-## Table of Contents
+The sensors are listed in the [README](../README.md#sensors-and-components) and
+every part in the bill of materials, [`BOM_v0.ods`](BOM_v0.ods). The rest of the
+circuit:
 
-- [Docs](#docs)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [System Overview](#system-overview)
-  - [Hardware Components](#hardware-components)
-  - [Software Dependencies](#software-dependencies)
-  - [Usage Instructions](#usage-instructions)
-  - [Troubleshooting](#troubleshooting)
+- A DS3234 real-time clock on SPI, chip select D10.
+- The SD card on SPI, chip select D8.
+- A 2x16 LCD on I2C at address 0x27.
+- An Omron G5Q-1 relay for the MQ-9B heater, its coil switched by a 2N7000
+  MOSFET, with a 1N4148 diode across the coil.
 
-## Introduction
+### Pins
 
-This multi-gas monitor is an environmental safety monitoring system designed to continuously monitor various environmental parameters to ensure safety and compliance. The system leverages multiple sensors to detect levels of gases, temperature, and humidity, providing real-time data visualization, logging, and alarm notifications.
+From `firmware/main/config.h`:
 
-## System Overview
+| Function | Pin |
+| --- | --- |
+| RGB LED red | D3 |
+| RGB LED green | D5 |
+| RGB LED blue | D6 |
+| Buzzer | D7 |
+| MQ-9B heater relay (2N7000 gate) | D4 |
+| Push button | A6 |
+| MQ-8 | A0 |
+| MQ-136 | A1 |
+| MQ-137 | A2 |
+| MQ-9B | A3 |
+| RTC chip select | D10 |
+| SD card chip select | D8 |
 
-The system integrates several components:
-
-- **Sensors:** SCD41 (CO₂, temperature, humidity), ENS160 (AQI, TVOC, eCO₂), MQ series (H₂, H₂S, NH₃, CH₄, CO).
-- **Display:** 2x16 I2C LCD for real-time data visualization.
-- **Data Logging:** SD card module for recording sensor data in CSV format.
-- **Alarms:** Buzzer and RGB LED indicators for alerting based on predefined thresholds.
-- **User Interface:** Push button to navigate through different data screens on the LCD.
-
-## Hardware Components
-
-- **Arduino Nano Every:** The microcontroller that orchestrates all operations.
-- **SCD41 Sensor:** Measures CO₂ concentration, temperature, and humidity.
-- **ENS160 Sensor:** Provides Air Quality Index (AQI), Total Volatile Organic Compounds (TVOC), and equivalent CO₂ (eCO₂) readings.
-- **MQ Series Sensors:**
-  - **MQ-8:** Detects Hydrogen (H₂) concentrations.
-  - **MQ-136:** Measures Hydrogen Sulfide (H₂S) levels.
-  - **MQ-137:** Monitors Ammonia (NH₃) concentrations.
-  - **MQ-9b:** Detects Methane (CH₄) and Carbon Monoxide (CO) levels.
-- **2x16 I2C LCD:** Displays sensor readings and system status.
-- **SD Card Module:** Logs sensor data for future analysis.
-- **RGB LEDs:** Visual indicators for system status (Green for normal, Red for alarms).
-- **Piezo Buzzer:** Auditory alarm for threshold breaches.
-- **Relay Module:** Controls the heating element for the MQ-9b sensor.
-- **Push Button:** Allows users to navigate through LCD screens.
-- **RTC Module (DS3234):** Keeps accurate time for timestamping logs.
+The button connects A6 to +5 V, and R10 (10k) pulls A6 to GND, so a press reads
+HIGH.
 
 ## Software Dependencies
 
-The firmware builds with the Arduino Nano Every core (`arduino:megaavr`) and these
-libraries. The versions are the ones CI builds with (`just setup` installs them).
+The firmware builds with the Arduino Nano Every core and these libraries. The
+versions are the ones CI builds with (`just setup` installs them).
 
 | Dependency | Library Manager name | Version |
 | --- | --- | --- |
+| Arduino megaAVR boards (Nano Every core) | `arduino:megaavr` | 1.8.8 |
 | SPI, Wire, EEPROM | included with the board core | |
 | [SD](https://github.com/arduino-libraries/SD) | `SD` | 1.3.0 |
 | [Rtc](https://github.com/Makuna/Rtc) | `Rtc by Makuna` | 2.5.0 |
@@ -68,34 +59,31 @@ LiquidMenu has to be set to use the I2C LCD library; see
 
 ## Usage Instructions
 
-1. **Setup Hardware:**
+1. **Configure:** the settings are in `config.h` and the alarm levels in
+   `alarmThresholds.h`; [`firmware/README.md`](../firmware/README.md) describes
+   each one.
 
-   - Connect all sensors to their respective pins as defined in `config.h`.
-   - Ensure the SD card is properly inserted into the SD card module.
-   - Connect the RTC module to the designated chip-select pin.
-   - Attach the RGB LEDs, buzzer, and relay to their respective pins.
-   - Connect the push button to `A6` with appropriate pull-up/down resistors.
+2. **Calibrate:** set `PERFORM_MQ_CALIBRATION` to `true`, upload, and run the
+   monitor in clean air. For each MQ sensor the firmware averages R0 over 10
+   readings and stores it in EEPROM. Then set `PERFORM_MQ_CALIBRATION` to
+   `false` and upload again, so the firmware reads R0 from EEPROM. The ppm
+   coefficients are not yet checked against a reference gas; see
+   [Calibration status](../README.md#calibration-status).
 
-2. **Configure Software:**
+3. **Run:** upload `main.ino` to the Arduino Nano Every. The push button pages
+   through the LCD screens. The RGB LED and buzzer show the alarm level:
 
-   - Adjust settings in `config.h` as needed, such as enabling/disabling debug prints, calibration, and data logging.
-   - Set appropriate threshold values for each sensor based on environmental safety requirements.
+   | Level | LED | Buzzer |
+   | --- | --- | --- |
+   | Normal | green | off |
+   | Warning | orange | on and off every 1 s |
+   | Danger | red | on |
 
-3. **Calibration:**
-
-   - If `PERFORM_MQ_CALIBRATION` is set to `true`, calibrate the MQ sensors in clean air conditions to establish baseline readings.
-   - After calibration, set `PERFORM_MQ_CALIBRATION` to `false` to use the stored R0 values from EEPROM.
-
-4. **Running the System:**
-
-   - Upload the `main.ino` sketch to the Arduino Nano Every.
-   - Upon startup, the system initializes all components and begins monitoring.
-   - Navigate through different sensor data screens using the push button.
-   - Monitor alarms via the buzzer and RGB LED indicators.
-
-5. **Data Access:**
-   - Retrieve the log file (named by `LOG_FILE_NAME` in `config.h`) from the SD card for analysis using spreadsheet software or other data processing tools.
-   - Real-time data can be viewed via Serial Monitor if enabled.
+4. **Data:** the log file (`LOG_FILE_NAME` in `config.h`) on the SD card is a
+   CSV. With `ENABLE_DATA_PRINTS` set to `true`, the firmware also prints each
+   reading on the serial port at 115200 baud, one JSON-style object per line. A gas
+   with no valid reading in the current heater phase prints as a bare `NaN`, which
+   strict JSON parsers reject.
 
 ## Troubleshooting
 
@@ -109,17 +97,6 @@ LiquidMenu has to be set to use the I2C LCD library; see
 
   - Check RTC module connections.
   - Ensure the RTC has a backup battery for maintaining time.
-
-- **Sensor Not Detected:**
-
-  - Verify wiring connections for each sensor.
-  - Ensure sensors are powered correctly.
-  - Check for I2C address conflicts.
-
-- **Alarms Not Triggering:**
-
-  - Confirm that sensor readings exceed the set thresholds.
-  - Ensure the buzzer and LED pins are correctly connected and functioning.
 
 - **LCD Not Displaying Data:**
   - Ensure the LiquidMenu library is correctly configured
