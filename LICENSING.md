@@ -5,8 +5,8 @@ explains what that means. [What applies where](#what-applies-where) is the opera
 section — it is how these files are made available. The commentary around it is for
 convenience; the binding terms are the full texts in [`LICENSES/`](LICENSES/).
 
-The software and the hardware design are licensed separately by component — not
-dual-licensed, since you do not get to choose which of the two covers a given file:
+Each part of the repository is licensed separately by component — not
+dual-licensed, since you do not get to choose which licence covers a given file:
 
 - **Software** — GNU General Public License v3.0 or later (`GPL-3.0-or-later`) —
   [`LICENSES/GPL-3.0-or-later.txt`](LICENSES/GPL-3.0-or-later.txt)
@@ -29,13 +29,14 @@ copies obtained from them keep that licence.
 | `firmware/`, `justfile`, `.github/`, and the plotting scripts in `data/` (`*.py`) | `GPL-3.0-or-later` |
 | `hardware/` — the KiCad schematic and board, and the PDF and SVG exported from them | `CERN-OHL-S-2.0` |
 | `docs/BOM_v0.ods` — the bill of materials | `CERN-OHL-S-2.0` |
+| `docs/assets/pic0_schematic.png` — a render of the schematic | `CERN-OHL-S-2.0` |
 | `data/` — the logged measurements (`*.CSV`, `*.csv`) and the plots made from them | `CC-BY-4.0` |
 | `docs/`, `README.md` | see below |
 
 **Documentation.** Documentation specific to software is licensed
 `GPL-3.0-or-later`, and documentation specific to hardware `CERN-OHL-S-2.0`. A
 document covering both — such as the build guide in `docs/README.md` and its photos
-in `docs/assets/` — and documentation specific to neither are licensed under both,
+in `docs/assets/`, other than the schematic render above — and documentation specific to neither are licensed under both,
 at your option.
 
 ## Third-party components
