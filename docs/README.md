@@ -2,7 +2,7 @@
 
 _multi-gas-monitor: environmental safety monitoring and logging_
 
-The [`assets`](assets/) folder contains images related to design and build; [`datasheets`](mq-datasheets/) contains datasheets for hardware components used in the build.
+The [`assets`](assets/) folder contains images related to design and build; [`mq-datasheets`](mq-datasheets/) links the MQ sensors' datasheets and explains how the firmware uses them.
 
 ## Table of Contents
 

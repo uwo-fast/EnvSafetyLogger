@@ -44,9 +44,7 @@ at your option.
 
 Anything vendored or included keeps its own licence, unaffected by this document.
 
-| Component | Licence |
-| --- | --- |
-| `docs/mq-datasheets/*.pdf` — the Winsen MQ-8, MQ-9B, MQ136 and MQ137 manuals | © Zhengzhou Winsen Electronics Technology Co., Ltd.; included for reference, not covered by this document |
+_None._
 
 The Arduino libraries the firmware builds against are installed at build time (see
 the `justfile`) and are not part of this repository.
