@@ -19,7 +19,7 @@ version published with the paper is tagged
 | --- | --- |
 | `firmware/main/` | The Arduino Nano Every firmware: `main.ino`, with settings in `config.h`, gas sensor coefficients in `mqGas.h` and alarm levels in `alarmThresholds.h`. See [`firmware/README.md`](firmware/README.md). |
 | `hardware/` | The KiCad schematic, with PDF and SVG exports. |
-| `docs/` | Build and usage notes ([`docs/README.md`](docs/README.md)), the bill of materials (`BOM_v0.ods`), photos and the MQ sensor datasheets. |
+| `docs/` | Build and usage notes ([`docs/README.md`](docs/README.md)), the bill of materials (`BOM_v0.ods`), photos and links to the MQ sensor datasheets. |
 | `data/` | Logs from the station, 6 to 17 November 2024, with the scripts that plot them ([`data/2024-11-pv-box/`](data/2024-11-pv-box/README.md)). |
 
 The 3D-printed enclosure is designed in
