@@ -6,7 +6,8 @@ section — it is how these files are made available. The commentary around it i
 convenience; the binding terms are the full texts in [`LICENSES/`](LICENSES/).
 
 Each part of the repository is licensed separately by component — not
-dual-licensed, since you do not get to choose which licence covers a given file:
+dual-licensed, since apart from the documentation described below you do not get
+to choose which licence covers a given file:
 
 - **Software** — GNU General Public License v3.0 or later (`GPL-3.0-or-later`) —
   [`LICENSES/GPL-3.0-or-later.txt`](LICENSES/GPL-3.0-or-later.txt)
