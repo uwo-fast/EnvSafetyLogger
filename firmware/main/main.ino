@@ -86,8 +86,8 @@ float ch4_ppm = 0.0; // Methane concentration
 float co_ppm = 0.0;  // Carbon Monoxide concentration
 
 // Button Debounce Variables
-bool buttonState = HIGH;
-bool lastButtonState = HIGH;
+bool buttonState = LOW;
+bool lastButtonState = LOW;
 unsigned long lastDebounceTime = 0;
 
 // Alarm Variables
